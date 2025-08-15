@@ -11,19 +11,22 @@ Disallow: /email-verification
 # Protected dashboards
 Disallow: /dashboard/
 
-# All other API
+# API endpoints
 Disallow: /api/accounts/
 Disallow: /api/costs/
 Disallow: /api/media/
+Disallow: /api/tours/
+Disallow: /api/events/
+Disallow: /api/bookings/
 
 # Prevent indexing tokenized URLs (reset/verify links)
 Disallow: /*?token=
 
-# prevent filtering pages from being indexed if you use query params like /events?category=...
-# Disallow: /*?*category=
-# Disallow: /*?*page=
+# Optional: prevent query-param filtering pages from being indexed
+Disallow: /*?*category=
+Disallow: /*?*page=
 
-# avoid .env or system files if exposed accidentally
+# Avoid exposing system or environment files accidentally
 Disallow: /.env
 Disallow: /package.json
 Disallow: /vite.config.js
