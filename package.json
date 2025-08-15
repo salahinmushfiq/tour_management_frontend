@@ -1,0 +1,60 @@
+{
+  "name": "tour_management_frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+
+    "@mui/material": "^5.15.18",
+    "@mui/x-data-grid": "^6.20.4",
+    "axios": "^1.7.2",
+    "date-fns": "^4.1.0",
+    "file-saver": "^2.0.5",
+    "framer-motion": "^10.18.0",
+    "gsap": "^3.13.0",
+    "jwt-decode": "^3.1.2",
+    "lucide-react": "^0.525.0",
+    "react": "^18.3.0",
+    "react-calendar": "^4.0.0",
+    "react-datepicker": "^8.4.0",
+    "react-dom": "^18.3.0",
+    "react-helmet-async": "^2.0.5",
+    "react-hot-toast": "^2.5.2",
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0",
+    "react-router-dom": "^6.23.0",
+    "react-scroll-parallax": "^3.4.5",
+    "swiper": "^11.2.10",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.4.19",
+    "vite-plugin-mkcert": "^1.17.8"
+  },
+  "browserslist": {
+    "production": [
+      "chrome >= 102",
+      "firefox >= 91",
+      "edge >= 102",
+      "safari >= 14"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

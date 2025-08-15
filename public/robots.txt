@@ -1,0 +1,29 @@
+User-agent: *
+# Auth & account pages
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /password-reset
+Disallow: /password-reset-confirm
+Disallow: /unauthorized
+Disallow: /email-verification
+
+# Protected dashboards
+Disallow: /dashboard/
+
+# All other API
+Disallow: /api/accounts/
+Disallow: /api/costs/
+Disallow: /api/media/
+
+# Prevent indexing tokenized URLs (reset/verify links)
+Disallow: /*?token=
+
+# prevent filtering pages from being indexed if you use query params like /events?category=...
+# Disallow: /*?*category=
+# Disallow: /*?*page=
+
+# avoid .env or system files if exposed accidentally
+Disallow: /.env
+Disallow: /package.json
+Disallow: /vite.config.js
