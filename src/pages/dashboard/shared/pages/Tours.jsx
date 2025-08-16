@@ -344,8 +344,11 @@ export default function Tours() {
   const navigate = useNavigate();
 
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
   const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 768);
+
+  // Server-side pagination
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(12); // default 12
 
   useEffect(() => {
     const handleResize = () => setIsSmallScreen(window.innerWidth < 768);
@@ -359,15 +362,15 @@ export default function Tours() {
     return () => window.removeEventListener("themeChanged", onThemeChange);
   }, []);
 
-  // 🔹 Server-side fetch
+  // 🔹 Fetch tours from server whenever page or pageSize changes
   useEffect(() => {
     async function fetchTours() {
       setLoading(true);
       try {
         const res = await axiosInstance.get(`${API_BASE}/tours/`, {
           params: {
-            page: paginationModel.page + 1, // DRF pages are 1-indexed
-            page_size: paginationModel.pageSize,
+            page: page + 1, // DRF is 1-indexed
+            page_size: pageSize,
           },
         });
         setTours(res.data.results || res.data);
@@ -379,7 +382,7 @@ export default function Tours() {
       }
     }
     fetchTours();
-  }, [paginationModel, API_BASE]);
+  }, [page, pageSize, API_BASE]);
 
   const handleDetails = (id) => {
     if (user?.role === "admin") navigate(`/dashboard/admin/tours/${id}`);
@@ -419,6 +422,7 @@ export default function Tours() {
     return baseCols;
   }, [isSmallScreen]);
 
+  // 🔹 Client-side search
   const filteredTours = useMemo(() => {
     if (!searchText) return tours;
     const lower = searchText.toLowerCase();
@@ -468,7 +472,7 @@ export default function Tours() {
   return (
     <div className="inset-0 max-w-full px-4">
       {loading ? (
-        <DataGridSkeleton columns={columns} rowCount={paginationModel.pageSize} />
+        <DataGridSkeleton columns={columns} rowCount={pageSize} />
       ) : (
         <div className="overflow-x-auto w-full max-w-full">
           <DataGrid
@@ -479,9 +483,12 @@ export default function Tours() {
             pagination
             paginationMode="server"
             rowCount={rowCount}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[10, 15, 25]}
+            paginationModel={{ page, pageSize }}
+            onPaginationModelChange={(model) => {
+              setPage(model.page);
+              setPageSize(model.pageSize);
+            }}
+            pageSizeOptions={[12, 25, 50]}
             disableColumnFilter
             disableColumnSelector
             disableDensitySelector
