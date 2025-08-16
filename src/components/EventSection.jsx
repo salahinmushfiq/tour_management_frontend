@@ -240,8 +240,6 @@ import EventModal from "./EventModal";
 export default function EventSection() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-
-  const [visibleCount, setVisibleCount] = useState(6);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -255,91 +253,63 @@ export default function EventSection() {
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
-  const fetchEvents = async (pageNum = 1) => {
+  // Fetch events with server-side filters
+  const fetchEvents = async (pageNum = 1, replace = false) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/tours/?page=${pageNum}`);
+      const params = {
+        page: pageNum,
+        search,
+        category,
+        location,
+        start_date: startDate?.toISOString(),
+        end_date: endDate?.toISOString(),
+      };
+      const res = await axios.get(`${API_BASE}/tours/`, { params });
       const data = res.data;
-      const results = Array.isArray(data.results)
-        ? data.results
-        : Array.isArray(data)
-        ? data
-        : [];
+      const results = Array.isArray(data.results) ? data.results : [];
 
-      setEvents((prev) => (pageNum === 1 ? results : [...prev, ...results]));
+      setEvents((prev) => (replace ? results : [...prev, ...results]));
       setHasMore(Boolean(data.next));
-      setLoading(false);
     } catch (err) {
       console.error(err);
+    } finally {
       setLoading(false);
     }
   };
 
+  // Initial fetch & refetch on filters
   useEffect(() => {
-    fetchEvents(1);
-  }, []);
+    setPage(1);
+    fetchEvents(1, true);
+  }, [search, category, location, startDate, endDate]);
 
   const categories = [...new Set(events.map((e) => e.category))].filter(Boolean);
   const locations = [...new Set(events.map((e) => e.start_location))].filter(Boolean);
 
-  const filteredEvents = events.filter((event) => {
-    const matchesSearch =
-      event.title.toLowerCase().includes(search.toLowerCase()) ||
-      event.start_location.toLowerCase().includes(search.toLowerCase());
-
-    const matchesCategory = category ? event.category === category : true;
-    const matchesLocation = location ? event.start_location === location : true;
-
-    const eventDate = new Date(event.start_date);
-    const matchesStartDate = startDate ? eventDate >= startDate : true;
-    const matchesEndDate = endDate ? eventDate <= endDate : true;
-
-    return matchesSearch && matchesCategory && matchesLocation && matchesStartDate && matchesEndDate;
-  });
-
   const clearFilter = (filterName) => {
     switch (filterName) {
-      case "category":
-        setCategory("");
-        break;
-      case "location":
-        setLocation("");
-        break;
-      case "search":
-        setSearch("");
-        break;
-      case "startDate":
-        setStartDate(null);
-        break;
-      case "endDate":
-        setEndDate(null);
-        break;
-      default:
-        break;
+      case "category": setCategory(""); break;
+      case "location": setLocation(""); break;
+      case "search": setSearch(""); break;
+      case "startDate": setStartDate(null); break;
+      case "endDate": setEndDate(null); break;
     }
   };
 
   const clearAllFilters = () => {
-    setCategory("");
-    setLocation("");
-    setSearch("");
-    setStartDate(null);
-    setEndDate(null);
+    setCategory(""); setLocation(""); setSearch(""); setStartDate(null); setEndDate(null);
   };
 
   const anyFilterActive = search || category || location || startDate || endDate;
 
   const loadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    setVisibleCount((c) => c + 6);
-    if (events.length < visibleCount + 6 && hasMore) {
+    if (!loading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
       fetchEvents(nextPage);
     }
   };
-
-  // Decide how many items to render (either cards or skeletons)
-  const renderCount = Math.min(visibleCount, filteredEvents.length || visibleCount);
 
   return (
     <section className="bg-gray-900 text-white px-4 pb-20 relative z-10 pt-12">
@@ -370,9 +340,7 @@ export default function EventSection() {
           >
             <option value="">All Categories</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
           <select
@@ -382,9 +350,7 @@ export default function EventSection() {
           >
             <option value="">All Locations</option>
             {locations.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
+              <option key={loc} value={loc}>{loc}</option>
             ))}
           </select>
           <DatePicker
@@ -401,7 +367,7 @@ export default function EventSection() {
           />
         </div>
 
-        {/* Selected filters chips */}
+        {/* Active Filters Chips */}
         {anyFilterActive && (
           <div className="flex flex-wrap justify-center mb-6">
             {search && <Chip label={`Search: ${search}`} onRemove={() => clearFilter("search")} />}
@@ -409,7 +375,6 @@ export default function EventSection() {
             {location && <Chip label={`Location: ${location}`} onRemove={() => clearFilter("location")} />}
             {startDate && <Chip label={`Start: ${startDate.toDateString()}`} onRemove={() => clearFilter("startDate")} />}
             {endDate && <Chip label={`End: ${endDate.toDateString()}`} onRemove={() => clearFilter("endDate")} />}
-
             <button
               onClick={clearAllFilters}
               className="ml-4 px-3 py-1 rounded-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition"
@@ -419,40 +384,42 @@ export default function EventSection() {
           </div>
         )}
 
-        {/* Event Cards with Skeletons */}
+        {/* Event Cards */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[24rem]">
-          {Array.from({ length: renderCount }).map((_, i) => {
-            const event = filteredEvents[i];
-
-            return event ? (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <EventCard event={event} onClick={() => setSelectedEvent(event)} />
-              </motion.div>
-            ) : (
-              <SkeletonCard key={`skeleton-${i}`} />
-            );
-          })}
+          {events.length === 0 && loading
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : events.map((event) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <EventCard event={event} onClick={() => setSelectedEvent(event)} />
+                </motion.div>
+              ))
+          }
         </motion.div>
 
         {/* Load More Button */}
-        {visibleCount < filteredEvents.length && (
+        {hasMore && (
           <div className="text-center mt-8">
             <button
               onClick={loadMore}
-              className="px-6 py-2 bg-brand rounded-full text-white hover:bg-brand-dark transition"
+              disabled={loading}
+              className={`px-6 py-2 rounded-full text-white transition ${
+                loading ? "bg-gray-600 cursor-not-allowed" : "bg-brand hover:bg-brand-dark"
+              }`}
             >
               {loading ? "Loading..." : "Load More"}
             </button>
           </div>
         )}
 
+        {/* Event Modal */}
         <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
       </div>
     </section>
   );
 }
+
