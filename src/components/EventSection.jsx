@@ -226,7 +226,8 @@
 // }
 
 // components/EventSection.jsx
-import React, { useEffect, useState } from "react";
+// components/EventSection.jsx
+import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -238,11 +239,11 @@ import EventCard from "./EventCard";
 import EventModal from "./EventModal";
 
 export default function EventSection() {
-  const [events, setEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]); // store all events once
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [page, setPage] = useState(1);
+
+  const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
   // Filters
   const [search, setSearch] = useState("");
@@ -253,63 +254,87 @@ export default function EventSection() {
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
-  // Fetch events with server-side filters
-  const fetchEvents = async (pageNum = 1, replace = false) => {
-    try {
-      setLoading(true);
-      const params = {
-        page: pageNum,
-        search,
-        category,
-        location,
-        start_date: startDate?.toISOString(),
-        end_date: endDate?.toISOString(),
-      };
-      const res = await axios.get(`${API_BASE}/tours/`, { params });
-      const data = res.data;
-      const results = Array.isArray(data.results) ? data.results : [];
-
-      setEvents((prev) => (replace ? results : [...prev, ...results]));
-      setHasMore(Boolean(data.next));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial fetch & refetch on filters
+  // Fetch all tours once
   useEffect(() => {
-    setPage(1);
-    fetchEvents(1, true);
-  }, [search, category, location, startDate, endDate]);
+    async function fetchEvents() {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/tours/?page_size=1000`); // fetch all at once
+        const results = Array.isArray(res.data.results) ? res.data.results : [];
+        setAllEvents(results);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
 
-  const categories = [...new Set(events.map((e) => e.category))].filter(Boolean);
-  const locations = [...new Set(events.map((e) => e.start_location))].filter(Boolean);
+  // Unique categories & locations for filters
+  const categories = useMemo(
+    () => [...new Set(allEvents.map((e) => e.category))].filter(Boolean),
+    [allEvents]
+  );
+  const locations = useMemo(
+    () => [...new Set(allEvents.map((e) => e.start_location))].filter(Boolean),
+    [allEvents]
+  );
+
+  // Apply all filters client-side
+  const filteredEvents = useMemo(() => {
+    return allEvents.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(search.toLowerCase()) ||
+        event.start_location.toLowerCase().includes(search.toLowerCase());
+
+      const matchesCategory = category ? event.category === category : true;
+      const matchesLocation = location ? event.start_location === location : true;
+
+      const eventDate = new Date(event.start_date);
+      const matchesStartDate = startDate ? eventDate >= startDate : true;
+      const matchesEndDate = endDate ? eventDate <= endDate : true;
+
+      return matchesSearch && matchesCategory && matchesLocation && matchesStartDate && matchesEndDate;
+    });
+  }, [allEvents, search, category, location, startDate, endDate]);
 
   const clearFilter = (filterName) => {
     switch (filterName) {
-      case "category": setCategory(""); break;
-      case "location": setLocation(""); break;
-      case "search": setSearch(""); break;
-      case "startDate": setStartDate(null); break;
-      case "endDate": setEndDate(null); break;
+      case "category":
+        setCategory("");
+        break;
+      case "location":
+        setLocation("");
+        break;
+      case "search":
+        setSearch("");
+        break;
+      case "startDate":
+        setStartDate(null);
+        break;
+      case "endDate":
+        setEndDate(null);
+        break;
+      default:
+        break;
     }
   };
 
   const clearAllFilters = () => {
-    setCategory(""); setLocation(""); setSearch(""); setStartDate(null); setEndDate(null);
+    setSearch("");
+    setCategory("");
+    setLocation("");
+    setStartDate(null);
+    setEndDate(null);
   };
 
   const anyFilterActive = search || category || location || startDate || endDate;
 
-  const loadMore = () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchEvents(nextPage);
-    }
-  };
+  // Load more logic
+  const loadMore = () => setVisibleCount((c) => c + 6);
+
+  const renderCount = Math.min(visibleCount, filteredEvents.length);
 
   return (
     <section className="bg-gray-900 text-white px-4 pb-20 relative z-10 pt-12">
@@ -367,7 +392,7 @@ export default function EventSection() {
           />
         </div>
 
-        {/* Active Filters Chips */}
+        {/* Selected filters chips */}
         {anyFilterActive && (
           <div className="flex flex-wrap justify-center mb-6">
             {search && <Chip label={`Search: ${search}`} onRemove={() => clearFilter("search")} />}
@@ -386,9 +411,9 @@ export default function EventSection() {
 
         {/* Event Cards */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[24rem]">
-          {events.length === 0 && loading
+          {loading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : events.map((event) => (
+            : filteredEvents.slice(0, renderCount).map((event) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -397,26 +422,21 @@ export default function EventSection() {
                 >
                   <EventCard event={event} onClick={() => setSelectedEvent(event)} />
                 </motion.div>
-              ))
-          }
+              ))}
         </motion.div>
 
         {/* Load More Button */}
-        {hasMore && (
+        {visibleCount < filteredEvents.length && (
           <div className="text-center mt-8">
             <button
               onClick={loadMore}
-              disabled={loading}
-              className={`px-6 py-2 rounded-full text-white transition ${
-                loading ? "bg-gray-600 cursor-not-allowed" : "bg-brand hover:bg-brand-dark"
-              }`}
+              className="px-6 py-2 bg-brand rounded-full text-white hover:bg-brand-dark transition"
             >
               {loading ? "Loading..." : "Load More"}
             </button>
           </div>
         )}
 
-        {/* Event Modal */}
         <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
       </div>
     </section>
