@@ -40,15 +40,12 @@ export default function SimpleTourDetails({ tour,guides,offers }) {
                   <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                     {guide.name}
                   </h3>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                    {guide.user_email}
-                  </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {guide.bio}
+                    {guide.experience} years experience
                   </p>
-                  {/* <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Languages: {guide.languages.join(", ")}
-                  </p> */}
+                  </p>
                 </div>
               ))}
             </div>

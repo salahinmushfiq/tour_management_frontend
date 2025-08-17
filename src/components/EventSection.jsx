@@ -239,13 +239,10 @@ import EventCard from "./EventCard";
 import EventModal from "./EventModal";
 
 export default function EventSection() {
-  const [allEvents, setAllEvents] = useState([]); // master list for selects
-  const [displayEvents, setDisplayEvents] = useState([]); // paginated display
+  const [allEvents, setAllEvents] = useState([]); // store all events once
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(12);
-  const [hasMore, setHasMore] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(false);
 
   // Filters
@@ -257,47 +254,24 @@ export default function EventSection() {
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
-  // Fetch events page-wise from backend
-  const fetchEvents = async (pageNum = 1) => {
-    try {
-      setLoading(true);
-      const params = { page: pageNum, page_size: pageSize };
-      if (category) params.category = category;
-      if (location) params.start_location = location;
-      if (search) params.search = search;
-
-      const res = await axios.get(`${API_BASE}/tours/`, { params });
-      const data = res.data;
-      const results = Array.isArray(data.results) ? data.results : [];
-
-      // Append new events for pagination
-      setDisplayEvents((prev) => (pageNum === 1 ? results : [...prev, ...results]));
-      setHasMore(Boolean(data.next));
-
-      // Keep a master copy for selects (only update on first load)
-      if (pageNum === 1 && allEvents.length === 0) {
-        setAllEvents(results);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch all tours once
   useEffect(() => {
-    setPage(1);
-    fetchEvents(1);
-  }, [category, location, search]);
+    async function fetchEvents() {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/tours/?page_size=1000`); // fetch all at once
+        const results = Array.isArray(res.data.results) ? res.data.results : [];
+        setAllEvents(results);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
 
-  const loadMore = () => {
-    if (!hasMore) return;
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchEvents(nextPage);
-  };
-
-  // Always derive selects from master allEvents
+  // Unique categories & locations for filters
   const categories = useMemo(
     () => [...new Set(allEvents.map((e) => e.category))].filter(Boolean),
     [allEvents]
@@ -307,15 +281,23 @@ export default function EventSection() {
     [allEvents]
   );
 
-  // Client-side filtering for date ranges
+  // Apply all filters client-side
   const filteredEvents = useMemo(() => {
-    return displayEvents.filter((event) => {
+    return allEvents.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(search.toLowerCase()) ||
+        event.start_location.toLowerCase().includes(search.toLowerCase());
+
+      const matchesCategory = category ? event.category === category : true;
+      const matchesLocation = location ? event.start_location === location : true;
+
       const eventDate = new Date(event.start_date);
       const matchesStartDate = startDate ? eventDate >= startDate : true;
       const matchesEndDate = endDate ? eventDate <= endDate : true;
-      return matchesStartDate && matchesEndDate;
+
+      return matchesSearch && matchesCategory && matchesLocation && matchesStartDate && matchesEndDate;
     });
-  }, [displayEvents, startDate, endDate]);
+  }, [allEvents, search, category, location, startDate, endDate]);
 
   const clearFilter = (filterName) => {
     switch (filterName) {
@@ -337,21 +319,22 @@ export default function EventSection() {
       default:
         break;
     }
-    setPage(1);
-    fetchEvents(1);
   };
 
   const clearAllFilters = () => {
+    setSearch("");
     setCategory("");
     setLocation("");
-    setSearch("");
     setStartDate(null);
     setEndDate(null);
-    setPage(1);
-    fetchEvents(1);
   };
 
   const anyFilterActive = search || category || location || startDate || endDate;
+
+  // Load more logic
+  const loadMore = () => setVisibleCount((c) => c + 6);
+
+  const renderCount = Math.min(visibleCount, filteredEvents.length);
 
   return (
     <section className="bg-gray-900 text-white px-4 pb-20 relative z-10 pt-12">
@@ -381,7 +364,9 @@ export default function EventSection() {
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
           >
             <option value="">All Categories</option>
-            {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
           </select>
           <select
             value={location}
@@ -389,17 +374,19 @@ export default function EventSection() {
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
           >
             <option value="">All Locations</option>
-            {locations.map((loc) => <option key={loc} value={loc}>{loc}</option>)}
+            {locations.map((loc) => (
+              <option key={loc} value={loc}>{loc}</option>
+            ))}
           </select>
           <DatePicker
             selected={startDate}
-            onChange={setStartDate}
+            onChange={(date) => setStartDate(date)}
             placeholderText="Start Date"
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-36"
           />
           <DatePicker
             selected={endDate}
-            onChange={setEndDate}
+            onChange={(date) => setEndDate(date)}
             placeholderText="End Date"
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-36"
           />
@@ -425,8 +412,8 @@ export default function EventSection() {
         {/* Event Cards */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[24rem]">
           {loading
-            ? Array.from({ length: pageSize }).map((_, i) => <SkeletonCard key={i} />)
-            : filteredEvents.map((event) => (
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+            : filteredEvents.slice(0, renderCount).map((event) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -439,7 +426,7 @@ export default function EventSection() {
         </motion.div>
 
         {/* Load More Button */}
-        {hasMore && (
+        {visibleCount < filteredEvents.length && (
           <div className="text-center mt-8">
             <button
               onClick={loadMore}
