@@ -50,7 +50,7 @@ export default function ViewProfile() {
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
         <img
-          src={profile.profile_picture || "https://via.placeholder.com/100"}
+          src={profile.profile_picture}
           alt="Profile"
           className="w-24 h-24 rounded-full border-2 border-gray-300"
         />

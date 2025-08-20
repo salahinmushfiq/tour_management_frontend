@@ -13,6 +13,8 @@ export default function GuideAssignments() {
       try {
         const res = await axiosInstance.get(`tours/tour-guide-assignments`);
         setAssignments(res.data);
+        console.log("fetch assignments");
+        console.log(res.data);
       } catch (err) {
         setError("Failed to load assignments");
       } finally {
@@ -59,9 +61,9 @@ export default function GuideAssignments() {
       <h2 className="text-xl font-semibold mb-4">Your Guide Assignments</h2>
 
       <ul className="space-y-4">
-        {assignments.map(({ id, tour, status, assigned_at, responded_at }) => (
+        {assignments.map(({ id, tour, status, assigned_at, responded_at,tour_title }) => (
           <li key={id} className="p-4 border rounded bg-gray-50 dark:bg-gray-900">
-            <h3 className="text-lg font-bold">{tour_title(tour)}</h3>
+            <h3 className="text-lg font-bold">{tour_title}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Dates: {tour.start_date} → {tour.end_date}
             </p>

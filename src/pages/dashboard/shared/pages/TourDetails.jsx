@@ -578,6 +578,8 @@ export default function TourDetails() {
       try {
         const res = await axiosInstance.get(`/tours/${id}/`);
         setTour(res.data);
+        console.log("res.data");
+        console.log(res.data);
         setFormData({
           description: res.data.description || "",
           category: res.data.category || "",
@@ -716,7 +718,7 @@ export default function TourDetails() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-1 md:px-4 py-2 -mb-px border-b-2 font-semibold ${
+              className={`px-1 md:px-4 py-2 -mb-px border-b-2 font-normal md:font-semibold ${
                 activeTab === tab
                   ? "border-blue-600 text-blue-600"
                   : "border-transparent text-gray-600 dark:text-gray-400 hover:text-blue-600"

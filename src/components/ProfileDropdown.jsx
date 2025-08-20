@@ -149,10 +149,10 @@ const ProfileDropdown = ({ variant = 'organizer' }) => {
       {/* 🔹 Button to toggle dropdown */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+        className={`flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white dark:bg-slate-700 text-gray-700 dark:text-white ${
           isTourist
-            ? 'border-2 border-primary bg-white p-1 shadow-md text-gray-700 dark:text-gray-200'
-            : 'bg-gray-800 p-2 text-white'
+            ? 'border-2 border-primary p-1 shadow-md'
+            : 'bg-gray-800 p-2 text-white border-2 border-primary'
         }`}
         aria-haspopup="true"
         aria-expanded={open}
@@ -170,7 +170,7 @@ const ProfileDropdown = ({ variant = 'organizer' }) => {
       {open && (
         <div
           className={`absolute right-0 mt-2 w-52 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${
-            isTourist ? 'bg-white text-gray-700' : 'bg-gray-900 text-white'
+            isTourist ? 'bg-white hover:bg-gray-100 dark:bg-slate-700 dark:hover:bg-gray-600 text-gray-700 dark:text-white' : 'bg-gray-900 text-white'
           }`}
           role="menu"
           aria-orientation="vertical"

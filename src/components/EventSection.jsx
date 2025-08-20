@@ -226,7 +226,6 @@
 // }
 
 // components/EventSection.jsx
-// components/EventSection.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
@@ -259,7 +258,7 @@ export default function EventSection() {
     async function fetchEvents() {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_BASE}/tours/?page_size=1000`); // fetch all at once
+        const res = await axios.get(`${API_BASE}/tours/?page_size=20`); // fetch all at once
         const results = Array.isArray(res.data.results) ? res.data.results : [];
         setAllEvents(results);
       } catch (err) {

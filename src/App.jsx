@@ -30,6 +30,7 @@ import GuideHome from './pages/dashboard/guide/GuideHome';
 import GuideAssignments from './pages/dashboard/guide/GuideAssignments';
 import ManageUsers from './pages/dashboard/admin/ManageUsers';
 import ProtectedRoute from './components/ProtectedRoute';
+import TourDetail from './pages/dashboard/tourist/TourDetail';
 
 export default function App() {
   return (
@@ -100,7 +101,7 @@ export default function App() {
               {/* Nested routes inside the layout */}
               <Route index element={<TouristHome />} /> {/* Default dashboard page */}
               <Route path="events" element={<Events />} /> {/* Tourist events page */}
-              <Route path="events/:id" element={<TourDetails />} /> {/* Optional event details */}
+              <Route path="events/:id" element={<TourDetail />} /> {/* Optional event details */}
               <Route path="profile" element={<ViewProfile />} />
               <Route path="profile/edit" element={<EditProfile />} />
             </Route>
