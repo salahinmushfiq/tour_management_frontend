@@ -225,7 +225,7 @@
 //   );
 // }
 
-// components/EventSection.jsx
+// src/components/EventSection.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
@@ -238,10 +238,9 @@ import EventCard from "./EventCard";
 import EventModal from "./EventModal";
 
 export default function EventSection() {
-  const [allEvents, setAllEvents] = useState([]); // store all events once
+  const [events, setEvents] = useState([]);
+  const [nextPage, setNextPage] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-
-  const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(false);
 
   // Filters
@@ -253,91 +252,73 @@ export default function EventSection() {
 
   const API_BASE = import.meta.env.VITE_API_URL;
 
-  // Fetch all tours once
-  useEffect(() => {
-    async function fetchEvents() {
-      try {
-        setLoading(true);
-        const res = await axios.get(`${API_BASE}/tours/?page_size=20`); // fetch all at once
-        const results = Array.isArray(res.data.results) ? res.data.results : [];
-        setAllEvents(results);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchEvents();
-  }, []);
+  // Build query string with current filters and optional page URL
+  const buildQuery = (pageUrl) => {
+    if (pageUrl) return pageUrl; // server-provided next page already includes params
 
-  // Unique categories & locations for filters
+    const params = new URLSearchParams();
+    params.append("page_size", 12);
+    if (search) params.append("search", search);
+    if (category) params.append("category", category);
+    if (location) params.append("start_location", location);
+    if (startDate) params.append("start_date", startDate.toISOString().split("T")[0]);
+    if (endDate) params.append("end_date", endDate.toISOString().split("T")[0]);
+
+    return `${API_BASE}/tours/?${params.toString()}`;
+  };
+
+  // Fetch tours from backend
+  const fetchEvents = async (pageUrl = null, replace = false) => {
+    try {
+      setLoading(true);
+      const url = buildQuery(pageUrl);
+      const res = await axios.get(url);
+
+      const data = Array.isArray(res.data.results) ? res.data.results : [];
+      setEvents((prev) => (replace ? data : [...prev, ...data]));
+      setNextPage(res.data.next);
+    } catch (err) {
+      console.error("Failed to fetch tours:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial fetch or when filters change
+  useEffect(() => {
+    fetchEvents(null, true); // replace previous results
+  }, [search, category, location, startDate, endDate]);
+
+  // Unique categories & locations for filter dropdowns
   const categories = useMemo(
-    () => [...new Set(allEvents.map((e) => e.category))].filter(Boolean),
-    [allEvents]
+    () => [...new Set(events.map((e) => e.category))].filter(Boolean),
+    [events]
   );
   const locations = useMemo(
-    () => [...new Set(allEvents.map((e) => e.start_location))].filter(Boolean),
-    [allEvents]
+    () => [...new Set(events.map((e) => e.start_location))].filter(Boolean),
+    [events]
   );
-
-  // Apply all filters client-side
-  const filteredEvents = useMemo(() => {
-    return allEvents.filter((event) => {
-      const matchesSearch =
-        event.title.toLowerCase().includes(search.toLowerCase()) ||
-        event.start_location.toLowerCase().includes(search.toLowerCase());
-
-      const matchesCategory = category ? event.category === category : true;
-      const matchesLocation = location ? event.start_location === location : true;
-
-      const eventDate = new Date(event.start_date);
-      const matchesStartDate = startDate ? eventDate >= startDate : true;
-      const matchesEndDate = endDate ? eventDate <= endDate : true;
-
-      return matchesSearch && matchesCategory && matchesLocation && matchesStartDate && matchesEndDate;
-    });
-  }, [allEvents, search, category, location, startDate, endDate]);
 
   const clearFilter = (filterName) => {
     switch (filterName) {
-      case "category":
-        setCategory("");
-        break;
-      case "location":
-        setLocation("");
-        break;
-      case "search":
-        setSearch("");
-        break;
-      case "startDate":
-        setStartDate(null);
-        break;
-      case "endDate":
-        setEndDate(null);
-        break;
-      default:
-        break;
+      case "category": setCategory(""); break;
+      case "location": setLocation(""); break;
+      case "search": setSearch(""); break;
+      case "startDate": setStartDate(null); break;
+      case "endDate": setEndDate(null); break;
     }
   };
 
   const clearAllFilters = () => {
-    setSearch("");
-    setCategory("");
-    setLocation("");
-    setStartDate(null);
-    setEndDate(null);
+    setSearch(""); setCategory(""); setLocation(""); setStartDate(null); setEndDate(null);
   };
 
   const anyFilterActive = search || category || location || startDate || endDate;
 
-  // Load more logic
-  const loadMore = () => setVisibleCount((c) => c + 6);
-
-  const renderCount = Math.min(visibleCount, filteredEvents.length);
-
   return (
     <section className="bg-gray-900 text-white px-4 pb-20 relative z-10 pt-12">
       <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -363,9 +344,7 @@ export default function EventSection() {
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
           >
             <option value="">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
+            {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
           </select>
           <select
             value={location}
@@ -373,9 +352,7 @@ export default function EventSection() {
             className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
           >
             <option value="">All Locations</option>
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>{loc}</option>
-            ))}
+            {locations.map((loc) => <option key={loc} value={loc}>{loc}</option>)}
           </select>
           <DatePicker
             selected={startDate}
@@ -391,7 +368,7 @@ export default function EventSection() {
           />
         </div>
 
-        {/* Selected filters chips */}
+        {/* Filter Chips */}
         {anyFilterActive && (
           <div className="flex flex-wrap justify-center mb-6">
             {search && <Chip label={`Search: ${search}`} onRemove={() => clearFilter("search")} />}
@@ -410,9 +387,9 @@ export default function EventSection() {
 
         {/* Event Cards */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[24rem]">
-          {loading
+          {loading && events.length === 0
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : filteredEvents.slice(0, renderCount).map((event) => (
+            : events.map((event) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -425,11 +402,12 @@ export default function EventSection() {
         </motion.div>
 
         {/* Load More Button */}
-        {visibleCount < filteredEvents.length && (
+        {nextPage && (
           <div className="text-center mt-8">
             <button
-              onClick={loadMore}
+              onClick={() => fetchEvents(nextPage)}
               className="px-6 py-2 bg-brand rounded-full text-white hover:bg-brand-dark transition"
+              disabled={loading}
             >
               {loading ? "Loading..." : "Load More"}
             </button>
@@ -441,4 +419,3 @@ export default function EventSection() {
     </section>
   );
 }
-
