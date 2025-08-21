@@ -839,9 +839,177 @@
 // }
 
 
-// src/pages/dashboard/tourist/TouristHome.jsx
+// // src/pages/dashboard/tourist/TouristHome.jsx
+// import React, { useEffect, useState } from "react";
+// import { motion } from "framer-motion";
+// import { useAuth } from "../../../context/AuthContext";
+// import { axiosInstance } from "../../../context/authAPI";
+// import TourCard from "../components/TourCard";
+
+// export default function TouristHome() {
+//   const { user } = useAuth();
+//   const [loading, setLoading] = useState(true);
+
+//   const [availableTours, setAvailableTours] = useState([]);
+//   const [pendingTours, setPendingTours] = useState([]);
+//   const [activeTours, setActiveTours] = useState([]);
+//   const [pastTours, setPastTours] = useState([]);
+
+//   // Section visibility (accordion)
+//   const [sections, setSections] = useState({
+//     available: true,
+//     pending: true,
+//     active: true,
+//     past: true,
+//   });
+
+//   // Layout preference (grid/list/compact)
+//   const [layout, setLayout] = useState(
+//     localStorage.getItem("tourLayout") || "compact"
+//   );
+
+//   useEffect(() => {
+//     localStorage.setItem("tourLayout", layout);
+//   }, [layout]);
+
+//   const fetchTours = async () => {
+//     if (!user) return;
+//     try {
+//       setLoading(true);
+//       const { data } = await axiosInstance.get("/tours/my-tours/");
+//       setAvailableTours(data.available_tours || []);
+//       setPendingTours(data.pending_tours || []);
+//       setActiveTours(data.active_tours || []);
+//       setPastTours(data.past_tours || []);
+//     } catch (err) {
+//       if (err.response) {
+//     // Server responded with status code outside 2xx
+//     console.error("Server response error:", err.response.status, err.response.data);
+//   } else if (err.request) {
+//     // No response received
+//     console.error("No response received:", err.request);
+//   } else {
+//     // Something else
+//     console.error("Error setting up request:", err.message);
+//   }
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchTours();
+//   }, [user]);
+
+//   const handleRequestJoin = async (tourId) => {
+//     try {
+//       await axiosInstance.post("/tours/participants/", { tour: tourId });
+//       fetchTours();
+//     } catch (err) {
+//       console.error("Error requesting to join tour:", err);
+//     }
+//   };
+
+//   const toggleSection = (section) => {
+//     setSections((prev) => ({ ...prev, [section]: !prev[section] }));
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="flex justify-center items-center min-h-[60vh]">
+//         <p className="text-lg text-gray-500">Loading your tours...</p>
+//       </div>
+//     );
+//   }
+
+//   // Responsive section class
+//   const sectionClass =
+//     layout === "grid"
+//       ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+//       : layout === "list"
+//       ? "flex flex-col gap-4"
+//       : layout === "compact"
+//       ? "grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+//       : "";
+
+//   const renderTourCard = (tour) => (
+//     <TourCard
+//       key={tour.id}
+//       tour={tour}
+//       showDetailButton={tour.status === "approved" || tour.status === "completed"}
+//       onRequestJoin={() => handleRequestJoin(tour.id)}
+//       layout={layout}
+//     />
+//   );
+
+//   const sectionsData = [
+//     { key: "available", label: "Available Tours", data: availableTours },
+//     { key: "pending", label: "Pending Tours", data: pendingTours },
+//     { key: "active", label: "Active Tours", data: activeTours },
+//     { key: "past", label: "Past Tours", data: pastTours },
+//   ];
+
+//   return (
+//     <div className="px-4 md:px-12 min-h-screen py-6">
+//       {/* Hero */}
+//       <motion.div
+//         initial={{ opacity: 0, y: -20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-6 shadow-lg"
+//       >
+//         <h1 className="text-3xl md:text-4xl font-bold mb-2">
+//           Welcome back, {user?.first_name || "Traveler"} 👋
+//         </h1>
+//         <p className="text-lg opacity-90">
+//           Browse available tours or check your joined tours.
+//         </p>
+//       </motion.div>
+
+//       {/* Layout toggle */}
+//       <div className="flex gap-2 mb-6">
+//         {["grid", "list", "compact"].map((l) => (
+//           <button
+//             key={l}
+//             onClick={() => setLayout(l)}
+//             className={`px-4 py-2 rounded-xl ${
+//               layout === l ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-600"
+//             }`}
+//           >
+//             {l.charAt(0).toUpperCase() + l.slice(1)}
+//           </button>
+//         ))}
+//       </div>
+
+//       {/* Sections */}
+//       {sectionsData.map((sec) => (
+//         <div key={sec.key} className="mb-6">
+//           <button
+//             onClick={() => toggleSection(sec.key)}
+//             className="w-full flex justify-between items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl mb-2"
+//           >
+//             <span className="font-semibold">{sec.label}</span>
+//             <span>{sections[sec.key] ? "▲" : "▼"}</span>
+//           </button>
+
+//           {sections[sec.key] && (
+//             <div className={sectionClass}>
+//               {sec.data && sec.data.length > 0 ? (
+//                 sec.data.map(renderTourCard)
+//               ) : (
+//                 <p className="text-gray-500 col-span-full px-4 py-6">
+//                   No tours in this section yet.
+//                 </p>
+//               )}
+//             </div>
+//           )}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// }
+
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../../context/AuthContext";
 import { axiosInstance } from "../../../context/authAPI";
 import TourCard from "../components/TourCard";
@@ -850,12 +1018,13 @@ export default function TouristHome() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  const [availableTours, setAvailableTours] = useState([]);
-  const [pendingTours, setPendingTours] = useState([]);
-  const [activeTours, setActiveTours] = useState([]);
-  const [pastTours, setPastTours] = useState([]);
+  const [toursData, setToursData] = useState({
+    available: [],
+    pending: [],
+    active: [],
+    past: [],
+  });
 
-  // Section visibility (accordion)
   const [sections, setSections] = useState({
     available: true,
     pending: true,
@@ -863,7 +1032,6 @@ export default function TouristHome() {
     past: true,
   });
 
-  // Layout preference (grid/list/compact)
   const [layout, setLayout] = useState(
     localStorage.getItem("tourLayout") || "compact"
   );
@@ -877,12 +1045,14 @@ export default function TouristHome() {
     try {
       setLoading(true);
       const { data } = await axiosInstance.get("/tours/my-tours/");
-      setAvailableTours(data.available_tours || []);
-      setPendingTours(data.pending_tours || []);
-      setActiveTours(data.active_tours || []);
-      setPastTours(data.past_tours || []);
+      setToursData({
+        available: data.available_tours || [],
+        pending: data.pending_tours || [],
+        active: data.active_tours || [],
+        past: data.past_tours || [],
+      });
     } catch (err) {
-      console.error("Error fetching tours:", err);
+      console.error("Error fetching tours:", err?.response || err);
     } finally {
       setLoading(false);
     }
@@ -905,23 +1075,12 @@ export default function TouristHome() {
     setSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <p className="text-lg text-gray-500">Loading your tours...</p>
-      </div>
-    );
-  }
-
-  // Responsive section class
   const sectionClass =
     layout === "grid"
       ? "grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
       : layout === "list"
       ? "flex flex-col gap-4"
-      : layout === "compact"
-      ? "grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-      : "";
+      : "grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
   const renderTourCard = (tour) => (
     <TourCard
@@ -934,11 +1093,16 @@ export default function TouristHome() {
   );
 
   const sectionsData = [
-    { key: "available", label: "Available Tours", data: availableTours },
-    { key: "pending", label: "Pending Tours", data: pendingTours },
-    { key: "active", label: "Active Tours", data: activeTours },
-    { key: "past", label: "Past Tours", data: pastTours },
+    { key: "available", label: "Available Tours" },
+    { key: "pending", label: "Pending Tours" },
+    { key: "active", label: "Active Tours" },
+    { key: "past", label: "Past Tours" },
   ];
+
+  // Skeleton Loader
+  const SkeletonCard = () => (
+    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-48 rounded-xl" />
+  );
 
   return (
     <div className="px-4 md:px-12 min-h-screen py-6">
@@ -963,7 +1127,9 @@ export default function TouristHome() {
             key={l}
             onClick={() => setLayout(l)}
             className={`px-4 py-2 rounded-xl ${
-              layout === l ? "bg-indigo-600 text-white" : "bg-gray-200 dark:bg-gray-600"
+              layout === l
+                ? "bg-indigo-600 text-white"
+                : "bg-gray-200 dark:bg-gray-600"
             }`}
           >
             {l.charAt(0).toUpperCase() + l.slice(1)}
@@ -982,17 +1148,26 @@ export default function TouristHome() {
             <span>{sections[sec.key] ? "▲" : "▼"}</span>
           </button>
 
-          {sections[sec.key] && (
-            <div className={sectionClass}>
-              {sec.data && sec.data.length > 0 ? (
-                sec.data.map(renderTourCard)
-              ) : (
-                <p className="text-gray-500 col-span-full px-4 py-6">
-                  No tours in this section yet.
-                </p>
-              )}
-            </div>
-          )}
+          <AnimatePresence initial={false}>
+            {sections[sec.key] && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className={sectionClass}
+              >
+                {loading ? (
+                  Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+                ) : toursData[sec.key] && toursData[sec.key].length > 0 ? (
+                  toursData[sec.key].map(renderTourCard)
+                ) : (
+                  <p className="text-gray-500 col-span-full px-4 py-6">
+                    No tours in this section yet.
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ))}
     </div>
