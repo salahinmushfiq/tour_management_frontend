@@ -400,7 +400,7 @@ export default function AdminHome() {
             {recentTours.map(t => (
               <li key={t.id} className="py-2 flex justify-between">
                 <span>{t.title}</span>
-                <span className="text-gray-400 text-sm">{new Date(t.created_at).toLocaleDateString()}</span>
+                <span className="text-gray-400 text-sm">{new Date(t.start_date).toLocaleDateString()}</span>
               </li>
             ))}
           </ul>
