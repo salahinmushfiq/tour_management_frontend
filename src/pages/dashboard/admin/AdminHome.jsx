@@ -329,10 +329,35 @@
 // }
 
 import React, { useEffect, useState } from "react";
+
+import CountUp from "react-countup";
 import axiosInstance from "../../../api/axiosInstance";
 
+// Skeleton components
+const CardSkeleton = () => (
+  <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 animate-pulse">
+    <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+  </div>
+);
+
+const ListSkeleton = ({ items = 5 }) => (
+  <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+    {Array.from({ length: items }).map((_, idx) => (
+      <li key={idx} className="py-2 flex justify-between">
+        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3 animate-pulse"></div>
+        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/6 animate-pulse"></div>
+      </li>
+    ))}
+  </ul>
+);
+
 export default function AdminHome() {
-  const [data, setData] = useState({ stats: {}, recentUsers: [], recentTours: [] });
+  const [data, setData] = useState({
+    stats: {},
+    recentUsers: [],
+    recentTours: [],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -342,7 +367,7 @@ export default function AdminHome() {
         setData({
           stats: res.data.stats,
           recentUsers: res.data.recent_users,
-          recentTours: res.data.recent_tours
+          recentTours: res.data.recent_tours,
         });
       } catch (err) {
         console.error(err);
@@ -353,8 +378,6 @@ export default function AdminHome() {
     fetchData();
   }, []);
 
-  if (loading) return <p>Loading dashboard...</p>;
-
   const { stats, recentUsers, recentTours } = data;
 
   const cards = [
@@ -362,48 +385,94 @@ export default function AdminHome() {
     { title: "Active Users (30d)", value: stats.active_users },
     { title: "Currently Logged In", value: stats.currently_logged_in },
     { title: "Total Tours", value: stats.total_tours },
-    { title: "Total Bookings", value: stats.total_bookings },
+    { title: "Approved Bookings", value: stats.approved_bookings },
+    { title: "Pending Requests", value: stats.pending_requests },
     { title: "Guides", value: stats.total_guides },
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+        Admin Dashboard
+      </h1>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {cards.map(card => (
-          <div key={card.title} className="bg-white shadow rounded-lg p-4">
-            <h2 className="text-gray-500 text-sm">{card.title}</h2>
-            <p className="text-2xl font-semibold">{card.value}</p>
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: cards.length }).map((_, idx) => (
+              <CardSkeleton key={idx} />
+            ))
+          : cards.map((card) => (
+              <div
+                key={card.title}
+                className="bg-white dark:bg-gray-800 shadow rounded-lg p-4"
+              >
+                <h2 className="text-gray-500 dark:text-gray-400 text-sm">
+                  {card.title}
+                </h2>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                  <CountUp
+                    end={card.value ?? 0}
+                    duration={1.5}
+                    separator=","
+                  />
+                </p>
+              </div>
+            ))}
       </div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white shadow rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-4">Recent Users</h2>
-          <ul className="divide-y divide-gray-200">
-            {recentUsers.map(u => (
-              <li key={u.id} className="py-2 flex justify-between">
-                <span>{u.username}</span>
-                <span className="text-gray-400 text-sm">{new Date(u.date_joined).toLocaleDateString()}</span>
-              </li>
-            ))}
-          </ul>
+        {/* Recent Users */}
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+            Recent Users
+          </h2>
+          {loading ? (
+            <ListSkeleton />
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {recentUsers.map((u) => (
+                <li
+                  key={u.id}
+                  className="py-2 flex justify-between text-gray-700 dark:text-gray-200"
+                >
+                  <span>{u.username || "Unknown User"}</span>
+                  <span className="text-gray-400 text-sm">
+                    {u.last_login
+                      ? new Date(u.last_login).toLocaleDateString()
+                      : "N/A"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div className="bg-white shadow rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-4">Recent Tours</h2>
-          <ul className="divide-y divide-gray-200">
-            {recentTours.map(t => (
-              <li key={t.id} className="py-2 flex justify-between">
-                <span>{t.title}</span>
-                <span className="text-gray-400 text-sm">{new Date(t.start_date).toLocaleDateString()}</span>
-              </li>
-            ))}
-          </ul>
+        {/* Recent Tours */}
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+            Recent Tours
+          </h2>
+          {loading ? (
+            <ListSkeleton />
+          ) : (
+            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+              {recentTours.map((t) => (
+                <li
+                  key={t.id}
+                  className="py-2 flex justify-between text-gray-700 dark:text-gray-200"
+                >
+                  <span>{t.title || "Untitled Tour"}</span>
+                  <span className="text-gray-400 text-sm">
+                    {t.start_date
+                      ? new Date(t.start_date).toLocaleDateString()
+                      : "N/A"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
