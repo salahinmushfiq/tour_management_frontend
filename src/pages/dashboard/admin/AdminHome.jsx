@@ -338,7 +338,7 @@ export default function AdminHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axiosInstance.get("/admin/dashboard-stats/");
+        const res = await axiosInstance.get("/tours/dashboard-stats/");
         setData({
           stats: res.data.stats,
           recentUsers: res.data.recent_users,
