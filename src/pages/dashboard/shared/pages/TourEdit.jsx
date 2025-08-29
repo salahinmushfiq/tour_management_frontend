@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import GuideAssignment from "../../organizer/GuideAssignment";
+import AssignGuide from "../../organizer/AssignGuide";
 import { useAuth } from "../../../../context/AuthContext";
 import axiosInstance from "../../../../api/axiosInstance";
 
@@ -297,7 +297,7 @@ export default function TourEdit() {
       )}
 
        {/* Guide Assignment section */}
-      <GuideAssignment tourId={id} userRole={user.role} />
+      <AssignGuide tourId={id} userRole={user.role} />
     </div>
   );
 }

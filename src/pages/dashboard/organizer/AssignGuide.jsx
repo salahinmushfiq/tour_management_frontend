@@ -7,7 +7,7 @@ const STATUS_COLORS = {
   declined: "bg-red-500 text-red-900",
 };
 
-export default function GuideAssignment({ tourId, userRole }) {
+export default function AssignGuide({ tourId, userRole }) {
   const [assignedGuides, setAssignedGuides] = useState([]);
   const [allGuides, setAllGuides] = useState([]);
   const [selectedGuideIds, setSelectedGuideIds] = useState([]);

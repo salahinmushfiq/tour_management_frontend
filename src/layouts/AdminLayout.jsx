@@ -1,33 +1,3 @@
-// import React, { useState } from 'react';
-// import AdminDashboardSidebar from '../components/AdminDashboardSidebar';
-// import Sidebar from '../components/Sidebar';
-// import DashboardNavbar from '../components/OrganizerDashboardNavbar';
-// import { Outlet } from 'react-router-dom';
-// import { useAuth } from '../context/AuthContext';
-
-// const AdminLayout = () => {
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-//   const { user } = useAuth();
-
-//   return (
-//     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-//       {/* Sidebar */}
-//       {/* <AdminDashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} /> */}
-//       <Sidebar role={user.role} collapsed={!sidebarOpen} onToggle={sidebarOpen} />
-//       {/* Main Content */}
-//       <div className="flex flex-col flex-1">
-//         <DashboardNavbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-//         <main className="flex-1 p-4">
-          
-//           <Outlet />
-//         </main>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AdminLayout;
-
 // src/layouts/AdminLayout.jsx
 import React from 'react';
 import { Outlet } from 'react-router-dom';
