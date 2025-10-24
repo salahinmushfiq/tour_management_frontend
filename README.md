@@ -120,9 +120,3 @@ Tailwind CSS for rapid UI styling
 Render + Netlify for free-tier deployment
 
 “TourMate aims to simplify how travelers connect, collaborate, and explore the world — one tour at a time.”
-
-vbnet
-Copy code
-
-Would you like me to tailor this further for **GitHub profile optimization** (e.g., badges, screenshots, and live demo thumbnails)?  
-That version looks great to recruiters browsing your repo.
