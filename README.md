@@ -1,10 +1,10 @@
 # 🌍 TourMate — Multi-Organizer Tour Management Platform (Frontend)
 
-TourMate is a full-stack **tour management web platform** that connects **organizers and tourists** through event creation, cost tracking, and collaborative trip planning.  
+TourMate is a full-stack **tour management web platform** that connects **organizers, guides, and tourists** through event creation, cost tracking, participant management, and collaborative trip planning.  
 This repository contains the **React + Vite** frontend of the platform.
 
 Live Demo: [https://tour-mate-vite.netlify.app/](https://tour-mate-vite.netlify.app/)  
-Backend API: [Django REST Framework + Djoser + JWT Authentication](https://github.com/salahinmushfiq/tour_management_backend) *(private/public link if applicable)*
+Backend API: [Django REST Framework + Djoser + JWT Authentication](https://github.com/salahinmushfiq/tour_management_backend)
 
 ---
 
@@ -13,21 +13,46 @@ Backend API: [Django REST Framework + Djoser + JWT Authentication](https://githu
 ### 👥 Authentication & Authorization
 - Email/password login & registration via **Djoser + JWT**
 - **Google and Facebook OAuth** integration
-- Role-based routing for **Tourists** and **Organizers**
+- Role-based dashboards for **Admin**, **Organizer**, **Guide**, and **Tourist**
 - Auto token refresh & session expiry modal
 
-### 🧭 User Experience
-- Clean, responsive design built with **Tailwind CSS**
-- Separate dashboards:
-  - **Organizer Dashboard:** manage tours, participants, and event media
-  - **Tourist Dashboard:** browse events, view organizers, and book tours
-- Landing page and dynamic route-based layouts
+---
 
-### 🗓️ Core Modules
-- **Event Management:** create, filter, and view tour events  
-- **Participant Handling:** organizer can track and manage participants  
-- **Media Sharing:** photo/video uploads for event highlights  
-- **Calendar View:** view tour timelines and upcoming events
+## 🧭 Role-Based Dashboards
+
+### 🧑‍💼 **Admin Dashboard**
+- View and manage all users (tourists, guides, organizers)
+- Approve or restrict organizers and guides
+- Monitor global event activity and user statistics
+- Access overview charts and system insights
+
+### 🧭 **Organizer Dashboard**
+- Create, update, and delete tours/events
+- Manage participants and assign guides
+- Upload event media and view performance analytics
+- Handle bookings and cost tracking
+
+### 🧑‍🏫 **Guide Dashboard**
+- Access tours they are assigned to
+- View itineraries, participant lists, and event locations
+- Update status or event progress in real time
+- Communicate updates with organizers
+
+### 🧳 **Tourist Dashboard**
+- Browse and filter tours by category and location
+- View organizer and guide profiles
+- Join or leave tours, view calendar events
+- Engage with trip media and feedback
+
+---
+
+## 🗓️ Core Modules
+
+- **Event Management:** create, filter, and view tours  
+- **Participant Handling:** organizers manage participants and guides  
+- **Media Sharing:** upload photos/videos for event highlights  
+- **Calendar View:** see upcoming events, itineraries, and bookings  
+- **Admin Insights:** platform-wide analytics and reports  
 
 ---
 
@@ -52,7 +77,7 @@ src/
 ├── assets/ # Images, icons, and static files
 ├── components/ # Shared UI components (cards, modals, filters, etc.)
 ├── context/ # AuthContext and session management
-├── layouts/ # Dashboard & landing page layouts
+├── layouts/ # Dashboard & landing page layouts for each role
 ├── pages/ # Route-level pages (Login, Dashboard, etc.)
 ├── routes/ # Route definitions and role-based guards
 └── utils/ # Helper functions and constants
@@ -66,7 +91,7 @@ Copy code
 
 1. **Login/Register:** via email/password or social OAuth  
 2. **JWT Tokens:** stored in `localStorage` and auto-refreshed  
-3. **Role Redirect:** users are routed to the correct dashboard  
+3. **Role Redirect:** users are routed to the correct dashboard (`/dashboard/admin`, `/dashboard/organizer`, `/dashboard/guide`, `/dashboard/tourist`)  
 4. **Session Handling:** token expiry tracked via timer & modal warnings  
 5. **Logout:** clears tokens and resets session state
 
@@ -99,7 +124,7 @@ Visit the app at http://localhost:5173
 🧩 Deployment
 This app is deployed on Netlify and connected to the Django backend hosted on Render.
 
-Continuous Deployment from GitHub
+Continuous deployment from GitHub
 
 .env variables configured in Netlify
 
@@ -110,7 +135,7 @@ Mushfiq Us Salahin
 📫 LinkedIn | GitHub
 
 Open for: Remote / Freelance / Full-time Software Engineering roles
-React | React Native | Django | Flutter | Laravel | MySQL | Firebase
+🛠️ React | React Native | Django | Flutter | Laravel | MySQL | Firebase
 
 🏆 Acknowledgements
 Djoser for backend authentication
