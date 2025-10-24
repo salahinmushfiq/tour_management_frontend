@@ -4,7 +4,7 @@ TourMate is a full-stack **tour management web platform** that connects **organi
 This repository contains the **React + Vite** frontend of the platform.
 
 Live Demo: [https://tour-mate-vite.netlify.app/](https://tour-mate-vite.netlify.app/)  
-Backend API: [Django REST Framework + Djoser + JWT Authentication](https://github.com/yourusername/tourmate-backend) *(private/public link if applicable)*
+Backend API: [Django REST Framework + Djoser + JWT Authentication](https://github.com/salahinmushfiq/tourmate-backend) *(private/public link if applicable)*
 
 ---
 
