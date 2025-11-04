@@ -13,8 +13,8 @@ export default function GuideAssignments() {
       try {
         const res = await axiosInstance.get(`tours/tour-guide-assignments`);
         setAssignments(res.data);
-        console.log("fetch assignments");
-        console.log(res.data);
+        // console.log("fetch assignments");
+        // console.log(res.data);
       } catch (err) {
         setError("Failed to load assignments");
       } finally {

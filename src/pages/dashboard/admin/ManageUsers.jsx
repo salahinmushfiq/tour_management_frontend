@@ -24,22 +24,29 @@ function DataGridSkeleton({ columns, rowCount = 10 }) {
         disableColumnMenu
         disableColumnFilter
         hideFooter
+        
       />
     </div>
   );
 }
+
 export default function ManageUsers() {
   const { accessToken } = useAuth();
+  const API_BASE = import.meta.env.VITE_API_URL;
+
+  // 🔹 State
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_BASE = import.meta.env.VITE_API_URL;
+  const [page, setPage] = useState(0);          // DataGrid page index (0-based)
+  const [pageSize, setPageSize] = useState(10); // DataGrid page size
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-  // 🔹 Listen to global theme change events
+  // Theme
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   useEffect(() => {
     const onThemeChange = (e) => setTheme(e.detail);
@@ -52,20 +59,25 @@ export default function ManageUsers() {
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
-
   const handleCloseSnackbar = () => setSnackbarOpen(false);
 
-  // 🔹 Fetch users
+  // 🔹 Fetch users from backend whenever page or pageSize changes
   useEffect(() => {
+    if (!accessToken) return;
+
     async function fetchUsers() {
-      if (!accessToken) return;
       setLoading(true);
       try {
         const res = await axiosInstance.get(`${API_BASE}/accounts/admin/users/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
+          params: {
+            page: page + 1, // DRF is 1-indexed
+            page_size: pageSize,
+          },
         });
-
-        setUsers(res.data);
+        // console.log(res.data.results);
+        setUsers(res.data.results);
+        setTotalUsers(res.data.count);
       } catch (err) {
         console.error('Failed to load users', err);
         showSnackbar('Failed to load users', 'error');
@@ -73,8 +85,9 @@ export default function ManageUsers() {
         setLoading(false);
       }
     }
+
     fetchUsers();
-  }, []);
+  }, [accessToken, page, pageSize]);
 
   // 🔹 Update role handler
   const handleRoleChange = async (id, newRole) => {
@@ -85,7 +98,6 @@ export default function ManageUsers() {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      // Optimistic UI update
       setUsers((prevUsers) =>
         prevUsers.map((u) => (u.id === id ? { ...u, role: newRole } : u))
       );
@@ -96,31 +108,36 @@ export default function ManageUsers() {
     }
   };
 
-  // 🔹 DataGrid Columns
-  const columns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'email', headerName: 'Email', width: 200 },
-    {
-      field: 'role',
-      headerName: 'Role',
-      width: 150,
-      renderCell: (params) => (
-        <FormControl size="small" className='m-4 w-full'>
-          <Select
-            className='dark:bg-slate-700 dark:text-white bg-white text-black'
-            value={params.row.role || 'tourist'} // fallback to tourist
-            onChange={(e) => handleRoleChange(params.row.id, e.target.value)}
-          >
-            <MenuItem value="tourist">Tourist</MenuItem>
-            <MenuItem value="organizer">Organizer</MenuItem>
-            <MenuItem value="guide">Guide</MenuItem>
-            <MenuItem value="admin">Admin</MenuItem>
-          </Select>
-        </FormControl>
-      ),
-    },
-  ];
+  // 🔹 DataGrid columns
+  const columns = useMemo(
+    () => [
+      { field: 'id', headerName: 'ID', width: 70 },
+      { field: 'email', headerName: 'Email', width: 200 },
+      { field: 'login_method', headerName: 'Method', width: 200 },
+      {
+        field: 'role',
+        headerName: 'Role',
+        width: 150,
+        renderCell: (params) => (
+          <FormControl size="small" className="m-4 w-full">
+            <Select
+              className="dark:bg-slate-700 dark:text-white bg-white text-black"
+              value={params.row.role || 'tourist'}
+              onChange={(e) => handleRoleChange(params.row.id, e.target.value)}
+            >
+              <MenuItem value="tourist">Tourist</MenuItem>
+              <MenuItem value="organizer">Organizer</MenuItem>
+              <MenuItem value="guide">Guide</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+          </FormControl>
+        ),
+      },
+    ],
+    []
+  );
 
+  // 🔹 DataGrid styles
   const sx = useMemo(
     () => ({
       boxShadow: 4,
@@ -155,26 +172,31 @@ export default function ManageUsers() {
   );
 
   return (
-    <div
-      style={{
-        width: "100%",
-        background: theme === "dark" ? "#1e293b" : "white",
-      }}
-    >
+    <div style={{ width: "100%", background: theme === "dark" ? "#1e293b" : "white" }}>
       {loading ? (
-        <DataGridSkeleton columns={columns} rowCount={10} />
+        <DataGridSkeleton columns={columns} rowCount={pageSize} />
       ) : (
-      <DataGrid
-        key={theme} // Rerender on theme change
-        rows={users}
-        columns={columns}
-        getRowId={(row) => row.id ?? row.pk ?? row.email}
-        pageSize={10}
-        rowsPerPageOptions={[10, 20, 50]}
-        pagination
-        loading={loading}
-        sx={sx}
-      />
+        <DataGrid
+          key={theme}
+          rows={users}
+          columns={columns}
+          getRowId={(row) => row.id ?? row.pk ?? row.email}
+          rowCount={totalUsers}
+          autoHeight
+          pagination
+          paginationMode="server"
+          paginationModel={{ page, pageSize }}
+          onPaginationModelChange={(model) => {
+            if (model.page !== page) setPage(model.page);
+            if (model.pageSize !== pageSize) {
+              setPageSize(model.pageSize);
+              setPage(0); // reset to first page when page size changes
+            }
+          }}
+          pageSizeOptions={[10, 20, 50]} // ✅ Correct prop name
+          loading={loading}
+          sx={sx}
+        />
       )}
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
         <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>

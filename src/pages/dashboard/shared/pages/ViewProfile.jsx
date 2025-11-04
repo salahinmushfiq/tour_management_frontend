@@ -15,7 +15,7 @@ export default function ViewProfile() {
     async function fetchProfile() {
       try {
         const res = await axiosInstance.get("/accounts/profile/");
-        console.log("Fetched user profile:", res.data);
+        // console.log("Fetched user profile:", res.data);
         setProfile(res.data);
       } catch (err) {
         console.error("Failed to load profile", err);

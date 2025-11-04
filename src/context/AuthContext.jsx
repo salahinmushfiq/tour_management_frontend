@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
    * Updates `accessToken`, `refreshToken`, and `user` state
    */
   const handleSaveTokens = (access, refresh) => {
-    console.log("🔑 Saving Tokens:", { access, refresh });
+    // console.log("🔑 Saving Tokens:", { access, refresh });
     saveTokens(access, refresh);
     setAccessToken(access);
     setRefreshToken(refresh);
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       // }
       try {
         const profile = await fetchUserProfile();
-        console.log("👤 Profile response:", profile.data);
+        // console.log("👤 Profile response:", profile.data);
         setUser(profile.data);
       } catch (err) {
         console.error("❌ Profile fetch failed:", err);

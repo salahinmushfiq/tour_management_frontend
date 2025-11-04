@@ -578,8 +578,8 @@ export default function TourDetails() {
       try {
         const res = await axiosInstance.get(`/tours/${id}/`);
         setTour(res.data);
-        console.log("res.data");
-        console.log(res.data);
+        // console.log("res.data");
+        // console.log(res.data);
         setFormData({
           description: res.data.description || "",
           category: res.data.category || "",

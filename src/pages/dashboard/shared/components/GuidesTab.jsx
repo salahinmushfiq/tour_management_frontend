@@ -709,6 +709,8 @@ export default function GuidesTab({ tourId, userRole }) {
             params: { tour_id: tourId },
           });
           setAllGuides(allRes.data);
+          // console.log("allRes.data");
+          // console.log(allRes.data);
         }
       } catch (err) {
         console.error(err);

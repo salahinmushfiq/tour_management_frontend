@@ -18,7 +18,7 @@ export default function AssignGuide({ tourId, userRole }) {
   // Fetch assigned guides and all guides on mount or tourId change
   useEffect(() => {
     async function fetchData() {
-      console.log(tourId);  
+      // console.log(tourId);  
       setLoading(true);
       try {
         // Assigned guides for this tour
