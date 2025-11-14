@@ -30,7 +30,7 @@ const stories = [
   {
     title: "The Last Trail",
     description: "Every journey ends, but the memories walk beside us forever.",
-    image: "https://res.cloudinary.com/dpfqlqewb/image/upload/v1763112724/bilaichori_qx7zm1.png",
+    image: "https://res.cloudinary.com/dpfqlqewb/image/upload/v1763112724/last_trail.png",
     layout: "full-screen",
     bg: "#111111",
   },
