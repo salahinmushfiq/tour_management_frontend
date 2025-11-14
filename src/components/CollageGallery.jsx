@@ -1,5 +1,4 @@
-// src/components/StickyStoryGalleryV2.tsx
-// src/components/StickyStoryGalleryPolished.tsx
+// export default StickyStoryGallery;
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -19,60 +18,64 @@ const stories = [
     description: "Under starlit skies, strangers become friends and stories are born.",
     image: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0",
     layout: "full-screen",
-    bg: "#1e1e1e",
+    bg: "#0f0f0f",
   },
   {
     title: "Misty Mornings",
     description: "A new day. Fog rolls over the hills, revealing hidden valleys.",
     image: "https://images.pexels.com/photos/6602396/pexels-photo-6602396.jpeg",
     layout: "image-right",
-    bg: "#f0f0f0",
+    bg: "#eeeeee",
   },
   {
     title: "The Last Trail",
     description: "Every journey ends, but the memories walk beside us forever.",
-    image: "https://images.unsplash.com/photo-1496483648148-47c686dc86a8",
-    layout: "text-only",
-    bg: "#7f6d5f",
+    image: "https://res.cloudinary.com/dpfqlqewb/image/upload/v1763112724/bilaichori_qx7zm1.png",
+    layout: "full-screen",
+    bg: "#111111",
   },
 ];
 
-const CollageGallery = () => {
+const StickyStoryGallery = () => {
   const containerRef = useRef(null);
   const sectionsRef = useRef([]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
+      // Initial setup
+      gsap.set(sectionsRef.current, { opacity: 0, scale: 0.95, x: 0 });
+      gsap.set(sectionsRef.current[0], { opacity: 1, scale: 1, zIndex: stories.length });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: `+=${stories.length * 70}%`, // tighter scroll
-          scrub: 1,
+          end: `+=${stories.length * 120}%`,
+          scrub: 1.5,
           pin: true,
+          anticipatePin: 1,
         },
       });
 
-      // Force first story to show
-      sectionsRef.current[0].style.opacity = "1";
-      sectionsRef.current[0].style.scale = "1";
+      sectionsRef.current.forEach((section, i) => {
+        const direction = stories[i].layout === "image-left" ? -100 : 100;
 
-      sectionsRef.current.forEach((section, index) => {
-        tl.to(
+        // Animate current slide in
+        tl.fromTo(
           section,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.8,
-            onStart: () => {
-              sectionsRef.current.forEach((s, i) => {
-                s.style.opacity = i === index ? "1" : "0";
-                s.style.scale = i === index ? "1" : "0.98";
-              });
-            },
-          },
-          index
+          { x: direction, opacity: 0, scale: 0.95 },
+          { x: 0, opacity: 1, scale: 1, duration: 1, ease: "power3.out", zIndex: stories.length - i },
+          i * 0.8
         );
+
+        // Animate previous slide out
+        if (i > 0) {
+          tl.to(
+            sectionsRef.current[i - 1],
+            { opacity: 0, scale: 0.96, x: -direction / 2, duration: 1, ease: "power3.inOut" },
+            i * 0.8
+          );
+        }
       });
     }, containerRef);
 
@@ -81,64 +84,40 @@ const CollageGallery = () => {
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden">
-      {stories.map((story, index) => (
+      {stories.map((story, i) => (
         <div
-          key={index}
-          ref={(el) => el && (sectionsRef.current[index] = el)}
-          // className="absolute inset-0 opacity-0 scale-[0.98] transition-all duration-500 flex items-center justify-center px-6 text-white"
-          className="absolute inset-0 opacity-0 scale-[0.98] transition-all duration-500 flex items-center justify-center px-4 text-white overflow-hidden max-w-full"
+          key={crypto.randomUUID()}
+          ref={(el) => (sectionsRef.current[i] = el)}
+          className="absolute inset-0 flex items-center justify-center px-4 md:px-10 overflow-hidden"
           style={{ backgroundColor: story.bg }}
         >
-          {/* Fullscreen layout */}
           {story.layout === "full-screen" && (
             <div className="relative w-full h-full flex items-center justify-center">
               <img
-                src={`${story.image}?auto=format&fit=crop&w=1400&q=80`}
+                src={`${story.image}?auto=format&fit=crop&w=1600&q=80`}
                 alt={story.title}
                 className="absolute inset-0 w-full h-full object-cover opacity-50"
               />
               <div className="relative z-10 max-w-3xl text-center px-4">
-                <h2 className="text-4xl md:text-6xl font-bold mb-4">{story.title}</h2>
-                <p className="text-lg md:text-xl">{story.description}</p>
+                <h2 className="text-4xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-lg">
+                  {story.title}
+                </h2>
+                <p className="text-lg md:text-xl text-white/90">{story.description}</p>
               </div>
             </div>
           )}
 
-          {/* Image left */}
-          {story.layout === "image-left" && (
-            <div className="flex flex-col md:flex-row items-center gap-10 max-w-6xl text-black">
+          {(story.layout === "image-left" || story.layout === "image-right") && (
+            <div className={`flex flex-col md:flex-row items-center gap-10 max-w-6xl text-black ${story.layout === "image-right" ? "md:flex-row-reverse" : ""}`}>
               <img
                 src={story.image}
                 alt={story.title}
-                className="w-full md:w-1/2 rounded-xl shadow-xl object-cover"
+                className="w-full md:w-1/2 rounded-xl shadow-2xl object-cover"
               />
-              <div className="max-w-xl text-left">
+              <div className="max-w-xl">
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">{story.title}</h2>
-                <p className="text-lg md:text-xl">{story.description}</p>
+                <p className="text-lg md:text-xl opacity-80">{story.description}</p>
               </div>
-            </div>
-          )}
-
-          {/* Image right */}
-          {story.layout === "image-right" && (
-            <div className="flex flex-col md:flex-row-reverse items-center gap-10 max-w-6xl text-black">
-              <img
-                src={story.image}
-                alt={story.title}
-                className="w-full md:w-1/2 rounded-xl shadow-xl object-cover"
-              />
-              <div className="max-w-xl text-left">
-                <h2 className="text-3xl md:text-5xl font-bold mb-4">{story.title}</h2>
-                <p className="text-lg md:text-xl">{story.description}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Text only */}
-          {story.layout === "text-only" && (
-            <div className="text-center px-6 max-w-3xl">
-              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">{story.title}</h2>
-              <p className="text-xl md:text-2xl text-white">{story.description}</p>
             </div>
           )}
         </div>
@@ -147,4 +126,4 @@ const CollageGallery = () => {
   );
 };
 
-export default CollageGallery;
+export default StickyStoryGallery;

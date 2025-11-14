@@ -1,78 +1,130 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
-import SocialLoginButton from '../../components/SocialLoginButton';
+import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
+import SocialLoginButton from "../../components/SocialLoginButton";
+import TouristWrapper from "./TouristWrapper";
+import { motion } from "framer-motion";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
-function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { login, socialLogin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
+
     try {
-      await login(email, password); // AuthContext handles redirect
+      await login(email, password);
     } catch (err) {
       console.error(err);
-      setError('Invalid email or password');
+      setError("Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 border rounded shadow">
-      <h2 className="text-2xl mb-6 font-semibold text-center">Login</h2>
-      {error && <p className="mb-4 text-red-600">{error}</p>}
+    <TouristWrapper scene="dusk">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="max-w-md mx-auto px-4 py-10"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <h2 className="text-3xl font-bold mb-2 text-center text-gray-100">
+            Welcome Back
+          </h2>
+          <p className="text-center text-gray-300 mb-6">
+            Continue your journey with us
+          </p>
+        </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block mb-1 font-medium">Email</label>
+        {error && (
+          <motion.p
+            initial={{ x: -10 }}
+            animate={{ x: 0 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="mb-4 text-red-400 font-medium"
+          >
+            {error}
+          </motion.p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <input
-            id="email"
             type="email"
-            className="w-full border px-3 py-2 rounded"
+            placeholder="Email"
+            className="w-full border border-gray-600 px-4 py-2 rounded-xl bg-gray-800/70 text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 transition"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </div>
-        <div>
-          <label htmlFor="password" className="block mb-1 font-medium">Password</label>
-          <input
-            id="password"
-            type="password"
-            className="w-full border px-3 py-2 rounded"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-2 rounded text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
 
-      <div className="mt-6 space-y-4">
-        <SocialLoginButton provider="google" onSuccess={socialLogin} />
-        <SocialLoginButton provider="facebook" onSuccess={socialLogin} />
-      </div>
+          {/* Password with toggle */}
+          <div className="relative">
+            <input
+              type={showPass ? "text" : "password"}
+              placeholder="Password"
+              className="w-full border border-gray-600 px-4 py-2 rounded-xl bg-gray-800/70 text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 transition"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-100"
+            >
+              {showPass ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            </button>
+          </div>
 
-      <p className="mt-4 text-center">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-blue-600 underline">Register</Link>
-      </p>
-    </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-2 rounded-xl font-semibold text-gray-100 transition-all duration-300 ${
+              loading
+                ? "bg-gray-600 cursor-not-allowed"
+                : "bg-accent hover:bg-accent-dark shadow-lg hover:shadow-xl"
+            }`}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <div className="flex items-center my-6">
+          <hr className="flex-1 border-gray-700" />
+          <span className="mx-3 text-gray-400">or continue with</span>
+          <hr className="flex-1 border-gray-700" />
+        </div>
+
+        <div className="space-y-3">
+          <SocialLoginButton provider="google" onSuccess={socialLogin} />
+          <SocialLoginButton provider="facebook" onSuccess={socialLogin} />
+        </div>
+
+        <p className="mt-6 text-center text-gray-100">
+          New here?{" "}
+          <Link
+            to="/register"
+            className="text-accent font-semibold underline hover:text-accent-dark transition"
+          >
+            Join the adventure
+          </Link>
+        </p>
+      </motion.div>
+    </TouristWrapper>
   );
 }
-
-export default Login;
