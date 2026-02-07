@@ -164,6 +164,7 @@ import {
   PlusSquare,
   Users,
   ShieldCheck, ClipboardList, MapPin,
+  ChartBarStacked,
 } from 'lucide-react';
 
 const navConfig = {
@@ -171,11 +172,13 @@ const navConfig = {
     { to: '/dashboard/admin', label: 'Dashboard', icon: <Home size={20} /> },
     { to: '/dashboard/admin/tours', label: 'Tours', icon: <ListCheck size={20} /> },
     { to: '/dashboard/admin/users', label: 'Users', icon: <Users size={20} /> },
+    { to: '/dashboard/admin/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
   ],
   organizer: [
     { to: '/dashboard/organizer', label: 'Dashboard', icon: <Home size={20} /> },
     { to: '/dashboard/organizer/tours', label: 'My Tours', icon: <ListCheck size={20} /> },
     { to: '/dashboard/organizer/tours/create', label: 'Create Tour', icon: <PlusSquare size={20} /> },
+    { to: '/dashboard/organizer/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
   ],
   guide: [
     { to: '/dashboard/guide', label: 'Dashboard', icon: <Home size={20} /> },

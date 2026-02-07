@@ -31,6 +31,12 @@ import GuideAssignments from './pages/dashboard/guide/GuideAssignments';
 import ManageUsers from './pages/dashboard/admin/ManageUsers';
 import ProtectedRoute from './components/ProtectedRoute';
 import TourDetail from './pages/dashboard/tourist/TourDetail';
+import OrganizerBookings from './pages/dashboard/organizer/OrganizerBookings';
+import AdminBookings from './pages/dashboard/admin/AdminBookings';
+import PaymentSuccess from './pages/dashboard/tourist/PaymentSuccess';
+import PaymentFailure from './pages/dashboard/tourist/PaymentFailure';
+import PaymentCancelled from './pages/dashboard/tourist/PaymentCancelled';
+import PaymentProcessing from './pages/dashboard/tourist/PaymentProcessing';
 
 export default function App() {
   return (
@@ -83,7 +89,7 @@ export default function App() {
               <Unauthorized />
             </>
           } />
-
+             
           {/* Tourist Dashboard Routes */}
           <Route element={<ProtectedRoute allowedRoles={['tourist']} />}>
             <Route
@@ -104,6 +110,10 @@ export default function App() {
               <Route path="events/:id" element={<TourDetail />} /> {/* Optional event details */}
               <Route path="profile" element={<ViewProfile />} />
               <Route path="profile/edit" element={<EditProfile />} />
+              <Route path="payment/success" element={<PaymentSuccess />} />
+              <Route path="payment/failure" element={<PaymentFailure />} />
+              <Route path="payment/cancelled" element={<PaymentCancelled />} />
+              <Route path="payment/processing" element={<PaymentProcessing />} />
             </Route>
           </Route>
 
@@ -126,6 +136,7 @@ export default function App() {
             >
               <Route index element={<OrganizerHome />} />
               <Route path="tours" element={<Tours/>} />
+              <Route path="bookings" element={<OrganizerBookings/>} />
               <Route path="tours/create" element={<TourCreate />} />
               <Route path="tours/:id" element={<TourDetails />} />
               <Route path="tours/:id/edit" element={<TourEdit/>} />
@@ -160,6 +171,8 @@ export default function App() {
               <Route path="tours/:id/edit" element={<TourEdit />} />
               <Route path="profile" element={<ViewProfile />} />
               <Route path="profile/edit" element={<EditProfile />} />
+              
+              <Route path="bookings" element={<AdminBookings/>} />
             </Route>
           </Route>
           {/* Guide Dashboard Routes */}
