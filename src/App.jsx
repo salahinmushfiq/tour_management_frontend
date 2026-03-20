@@ -12,7 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { Login, Register, PasswordResetConfirm, PasswordResetRequest,
   LandingPage, Unauthorized, OrganizerHome, TouristHome, AdminHome, TourDetails,
   ViewProfile, EditProfile, TourEdit, TourCreate, Tours, GuideHome, GuideAssignments,
-  ManageUsers, TourDetail, OrganizerBookings, AdminBookings, PaymentSuccess,
+  ManageUsers, TouristTourDetails, OrganizerBookings, AdminBookings, PaymentSuccess,
   PaymentFailure, PaymentCancelled, PaymentProcessing} from './pages';
 import AppProviders from './providers/AppProviders';
 
@@ -83,7 +83,7 @@ export default function App() {
           >
             {/* Nested routes inside the layout */}
             <Route index element={<TouristHome />} /> {/* Default dashboard page */}
-            <Route path="events/:id" element={<TourDetail />} /> {/* Optional event details */}
+            <Route path="events/:id" element={<TouristTourDetails />} /> {/* Optional event details */}
             <Route path="profile" element={<ViewProfile />} />
             <Route path="profile/edit" element={<EditProfile />} />
             <Route path="payment/success" element={<PaymentSuccess />} />
