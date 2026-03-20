@@ -1,19 +1,29 @@
+// tokenService.js
 import jwtDecode from 'jwt-decode';
 
+const ACCESS_KEY = 'accessToken';
+const REFRESH_KEY = 'refreshToken';
+const USER_KEY = 'user';
+
 export const saveTokens = (access, refresh) => {
-  localStorage.setItem('access', access);
-  localStorage.setItem('refresh', refresh);
+  localStorage.setItem(ACCESS_KEY, access);
+  localStorage.setItem(REFRESH_KEY, refresh);
+  localStorage.setItem(USER_KEY, JSON.stringify(decodeToken(access)));
 };
 
 export const clearTokens = () => {
-  localStorage.removeItem('access');
-  localStorage.removeItem('refresh');
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+  localStorage.removeItem(USER_KEY);
 };
 
-export const getAccessToken = () => localStorage.getItem('access');
-export const getRefreshToken = () => localStorage.getItem('refresh');
+export const getAccessToken = () => localStorage.getItem(ACCESS_KEY);
+export const getRefreshToken = () => localStorage.getItem(REFRESH_KEY);
+export const getUser = () =>
+  JSON.parse(localStorage.getItem(USER_KEY) || 'null');
 
 export const decodeToken = (token) => {
+  if (!token) return null;
   try {
     return jwtDecode(token);
   } catch {
@@ -22,16 +32,14 @@ export const decodeToken = (token) => {
 };
 
 export const getTokenExpiryTime = (token) => {
-  try {
-    return jwtDecode(token).exp * 1000;
-  } catch {
-    return null;
-  }
+  const decoded = decodeToken(token);
+  return decoded ? decoded.exp * 1000 : null; // JWT exp in ms
 };
 
 export const formatTime = (ms) => {
-  if (!ms || ms < 0) return null;
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  if (!ms || ms <= 0) return '00:00';
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${seconds}`;
 };
