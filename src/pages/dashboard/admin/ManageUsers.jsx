@@ -1,58 +1,28 @@
+// src/pages/dashboard/admin/ManageUsers.jsx
 import React, { useEffect, useState, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { MenuItem, Select, FormControl, Snackbar, Alert } from '@mui/material';
 import { useAuth } from '../../../context/AuthContext';
-import { axiosInstance } from '../../../context/authAPI';
-
-// 🔹 Skeleton Loader for DataGrid
-function DataGridSkeleton({ columns, rowCount = 10 }) {
-  const skeletonRows = Array.from({ length: rowCount }, (_, i) =>
-    Object.fromEntries(columns.map((c) => [c.field, `loading-${i}-${c.field}`]))
-  );
-
-  return (
-    <div className="animate-pulse">
-      <DataGrid
-        rows={skeletonRows}
-        columns={columns.map((col) => ({
-          ...col,
-          renderCell: () => (
-            <div className="h-4 w-24 bg-gray-300 dark:bg-gray-600 rounded" />
-          ),
-        }))}
-        autoHeight
-        disableColumnMenu
-        disableColumnFilter
-        hideFooter
-        
-      />
-    </div>
-  );
-}
+import axiosInstance from '../../../api/axiosInstance'; // your axios wrapper
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useUIStore } from '../../../store/useUIStore';
+import DataGridSkeleton from '../../../components/DataGridSkeleton';
 
 export default function ManageUsers() {
   const { accessToken } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL;
+  const queryClient = useQueryClient();
 
   // 🔹 State
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);          // DataGrid page index (0-based)
-  const [pageSize, setPageSize] = useState(10); // DataGrid page size
-  const [totalUsers, setTotalUsers] = useState(0);
+  const [page, setPage] = useState(0);          
+  const [pageSize, setPageSize] = useState(10); 
+  const theme = useUIStore((state) => state.theme);
 
   // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
-  // Theme
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  useEffect(() => {
-    const onThemeChange = (e) => setTheme(e.detail);
-    window.addEventListener('themeChanged', onThemeChange);
-    return () => window.removeEventListener('themeChanged', onThemeChange);
-  }, []);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbarMessage(message);
@@ -61,51 +31,48 @@ export default function ManageUsers() {
   };
   const handleCloseSnackbar = () => setSnackbarOpen(false);
 
-  // 🔹 Fetch users from backend whenever page or pageSize changes
-  useEffect(() => {
-    if (!accessToken) return;
+  // 🔹 Fetch users
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['users', page, pageSize],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`${API_BASE}/accounts/admin/users/`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { page: page + 1, page_size: pageSize },
+      });
+      return res.data; // { results: [], count: 123 }
+    },
+    enabled: !!accessToken, // only run if token exists
+    keepPreviousData: true,
+  });
 
-    async function fetchUsers() {
-      setLoading(true);
-      try {
-        const res = await axiosInstance.get(`${API_BASE}/accounts/admin/users/`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          params: {
-            page: page + 1, // DRF is 1-indexed
-            page_size: pageSize,
-          },
-        });
-        // console.log(res.data.results);
-        setUsers(res.data.results);
-        setTotalUsers(res.data.count);
-      } catch (err) {
-        console.error('Failed to load users', err);
-        showSnackbar('Failed to load users', 'error');
-      } finally {
-        setLoading(false);
-      }
-    }
+  const users = data?.results || [];
+  const totalUsers = data?.count || 0;
 
-    fetchUsers();
-  }, [accessToken, page, pageSize]);
-
-  // 🔹 Update role handler
-  const handleRoleChange = async (id, newRole) => {
-    try {
-      await axiosInstance.patch(
+  // 🔹 Mutation for role update
+  const roleMutation = useMutation({
+    mutationFn: async ({ id, newRole }) => {
+      return axiosInstance.patch(
         `${API_BASE}/accounts/admin/users/${id}/`,
         { role: newRole },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => (u.id === id ? { ...u, role: newRole } : u))
-      );
+    },
+    onSuccess: (_, variables) => {
+      // Update cached query data
+      queryClient.setQueryData(['users', page, pageSize], (oldData) => {
+        if (!oldData) return oldData;
+        const updatedResults = oldData.results.map((u) =>
+          u.id === variables.id ? { ...u, role: variables.newRole } : u
+        );
+        return { ...oldData, results: updatedResults };
+      });
       showSnackbar('Role updated successfully!', 'success');
-    } catch (err) {
-      console.error('Failed to update role', err);
-      showSnackbar('Failed to update role', 'error');
-    }
+    },
+    onError: () => showSnackbar('Failed to update role', 'error'),
+  });
+
+  const handleRoleChange = (id, newRole) => {
+    roleMutation.mutate({ id, newRole });
   };
 
   // 🔹 DataGrid columns
@@ -119,7 +86,7 @@ export default function ManageUsers() {
         headerName: 'Role',
         width: 150,
         renderCell: (params) => (
-          <FormControl size="small" className="m-4 w-full">
+          <FormControl size="small" className="m-2 w-full">
             <Select
               className="dark:bg-slate-700 dark:text-white bg-white text-black"
               value={params.row.role || 'tourist'}
@@ -142,39 +109,38 @@ export default function ManageUsers() {
     () => ({
       boxShadow: 4,
       border: 0,
-      "& .MuiDataGrid-columnHeaders": {
-        backgroundColor: theme === "light" ? "#f8fafc" : "#1f2937",
-        color: theme === "light" ? "#1f2937" : "#e5e7eb",
+      '& .MuiDataGrid-columnHeaders': {
+        backgroundColor: theme === 'light' ? '#f8fafc' : '#1f2937',
+        color: theme === 'light' ? '#1f2937' : '#e5e7eb',
         fontWeight: 600,
       },
-      "& .MuiDataGrid-row": {
-        backgroundColor: theme === "light" ? "#ffffff" : "#0f172a",
-        color: theme === "light" ? "#1f2937" : "#e5e7eb",
+      '& .MuiDataGrid-row': {
+        backgroundColor: theme === 'light' ? '#ffffff' : '#0f172a',
+        color: theme === 'light' ? '#1f2937' : '#e5e7eb',
       },
-      "& .MuiDataGrid-cell": {
-        color: theme === "light" ? "#1f2937" : "#e5e7eb",
+      '& .MuiDataGrid-cell': { color: theme === 'light' ? '#1f2937' : '#e5e7eb' },
+      '& .MuiDataGrid-row:hover': {
+        backgroundColor: theme === 'light' ? '#f3f4f6' : '#1e293b',
       },
-      "& .MuiDataGrid-row:hover": {
-        backgroundColor: theme === "light" ? "#f3f4f6" : "#1e293b",
+      '& .MuiDataGrid-footerContainer': {
+        backgroundColor: theme === 'light' ? '#f8fafc' : '#1e293b',
+        color: theme === 'light' ? '#4b5563' : '#e5e7eb',
       },
-      "& .MuiDataGrid-footerContainer": {
-        backgroundColor: theme === "light" ? "#f8fafc" : "#1e293b",
-        color: theme === "light" ? "#4b5563" : "#e5e7eb",
-      },
-      "& .MuiTablePagination-root": {
-        color: theme === "light" ? "#4b5563" : "#e5e7eb",
-      },
-      "& .MuiSvgIcon-root": {
-        color: theme === "light" ? "#4b5563" : "#e5e7eb",
-      },
+      '& .MuiTablePagination-root': { color: theme === 'light' ? '#4b5563' : '#e5e7eb' },
+      '& .MuiSvgIcon-root': { color: theme === 'light' ? '#4b5563' : '#e5e7eb' },
     }),
     [theme]
   );
 
+  if (error) return <div className="text-red-500">Failed to load users.</div>;
+
   return (
-    <div style={{ width: "100%", background: theme === "dark" ? "#1e293b" : "white" }}>
-      {loading ? (
-        <DataGridSkeleton columns={columns} rowCount={pageSize} />
+    <div style={{ width: '100%', background: theme === 'dark' ? '#1e293b' : 'white' }}>
+      {isLoading ? (
+         <DataGridSkeleton
+          columns={columns}
+          rowCount={pageSize}
+        />
       ) : (
         <DataGrid
           key={theme}
@@ -190,14 +156,15 @@ export default function ManageUsers() {
             if (model.page !== page) setPage(model.page);
             if (model.pageSize !== pageSize) {
               setPageSize(model.pageSize);
-              setPage(0); // reset to first page when page size changes
+              setPage(0); // reset to first page
             }
           }}
-          pageSizeOptions={[10, 20, 50]} // ✅ Correct prop name
-          loading={loading}
+          pageSizeOptions={[10, 20, 50]}
+          loading={isLoading || roleMutation.isLoading}
           sx={sx}
         />
       )}
+
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
         <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}

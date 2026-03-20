@@ -327,13 +327,14 @@
 //     </div>
 //   );
 // }
-
-import React, { useEffect, useState } from "react";
-
+//admin/AdminHome.jsx
+import React, { useMemo } from "react";
 import CountUp from "react-countup";
-import axiosInstance from "../../../api/axiosInstance";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from '../../../context/AuthContext';
+import { fetchDashboardStats } from "../../../api/authAPI";
 
-// Skeleton components
+// Skeleton for cards
 const CardSkeleton = () => (
   <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-4 animate-pulse">
     <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
@@ -341,6 +342,7 @@ const CardSkeleton = () => (
   </div>
 );
 
+// Skeleton for lists
 const ListSkeleton = ({ items = 5 }) => (
   <ul className="divide-y divide-gray-200 dark:divide-gray-700">
     {Array.from({ length: items }).map((_, idx) => (
@@ -353,42 +355,31 @@ const ListSkeleton = ({ items = 5 }) => (
 );
 
 export default function AdminHome() {
-  const [data, setData] = useState({
-    stats: {},
-    recentUsers: [],
-    recentTours: [],
+  const { user } = useAuth();
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: fetchDashboardStats,
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axiosInstance.get("/tours/dashboard-stats/");
-        setData({
-          stats: res.data.stats,
-          recentUsers: res.data.recent_users,
-          recentTours: res.data.recent_tours,
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  if (error) return <div className="text-red-500">Failed to load dashboard.</div>;
 
-  const { stats, recentUsers, recentTours } = data;
+  // Use safe defaults
+  const stats = data?.stats ?? {};
+  const cards = useMemo(() => [
+    { title: "Total Users", value: stats.total_users ?? 0 },
+    { title: "Active Users (30d)", value: stats.active_users ?? 0 },
+    { title: "Currently Logged In", value: stats.currently_logged_in ?? 0 },
+    { title: "Total Tours", value: stats.total_tours ?? 0 },
+    { title: "Approved Bookings", value: stats.approved_bookings ?? 0 },
+    { title: "Pending Requests", value: stats.pending_requests ?? 0 },
+    { title: "Guides", value: stats.total_guides ?? 0 },
+  ], [stats]);
 
-  const cards = [
-    { title: "Total Users", value: stats.total_users },
-    { title: "Active Users (30d)", value: stats.active_users },
-    { title: "Currently Logged In", value: stats.currently_logged_in },
-    { title: "Total Tours", value: stats.total_tours },
-    { title: "Approved Bookings", value: stats.approved_bookings },
-    { title: "Pending Requests", value: stats.pending_requests },
-    { title: "Guides", value: stats.total_guides },
-  ];
+  const recentUsers = data?.recent_users ?? [];
+  const recentTours = data?.recent_tours ?? [];
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -398,24 +389,13 @@ export default function AdminHome() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {loading
-          ? Array.from({ length: cards.length }).map((_, idx) => (
-              <CardSkeleton key={idx} />
-            ))
+        {isLoading
+          ? Array.from({ length: 7 }).map((_, idx) => <CardSkeleton key={idx} />)
           : cards.map((card) => (
-              <div
-                key={card.title}
-                className="bg-white dark:bg-gray-800 shadow rounded-lg p-4"
-              >
-                <h2 className="text-gray-500 dark:text-gray-400 text-sm">
-                  {card.title}
-                </h2>
+              <div key={card.title} className="bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                <h2 className="text-gray-500 dark:text-gray-400 text-sm">{card.title}</h2>
                 <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                  <CountUp
-                    end={card.value ?? 0}
-                    duration={1.5}
-                    separator=","
-                  />
+                  <CountUp start={0} end={card.value} duration={1.5} separator="," />
                 </p>
               </div>
             ))}
@@ -428,23 +408,18 @@ export default function AdminHome() {
           <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
             Recent Users
           </h2>
-          {loading ? (
+          {isLoading ? (
             <ListSkeleton />
           ) : (
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {recentUsers.map((u) => (
-                <li
-                  key={u.id}
-                  className="py-2 flex justify-between text-gray-700 dark:text-gray-200"
-                >
-                  <span>{u.username || "Unknown User"}</span>
+              {recentUsers.length > 0 ? recentUsers.map(u => (
+                <li key={u.id} className="py-2 flex justify-between text-gray-700 dark:text-gray-200">
+                  <span>{u.username ?? "Unknown User"}</span>
                   <span className="text-gray-400 text-sm">
-                    {u.last_login
-                      ? new Date(u.last_login).toLocaleDateString()
-                      : "N/A"}
+                    {u.last_login ? new Date(u.last_login).toLocaleDateString() : "N/A"}
                   </span>
                 </li>
-              ))}
+              )) : <li className="py-2 text-gray-500">No recent users</li>}
             </ul>
           )}
         </div>
@@ -454,23 +429,18 @@ export default function AdminHome() {
           <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
             Recent Tours
           </h2>
-          {loading ? (
+          {isLoading ? (
             <ListSkeleton />
           ) : (
             <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-              {recentTours.map((t) => (
-                <li
-                  key={t.id}
-                  className="py-2 flex justify-between text-gray-700 dark:text-gray-200"
-                >
-                  <span>{t.title || "Untitled Tour"}</span>
+              {recentTours.length > 0 ? recentTours.map(t => (
+                <li key={t.id} className="py-2 flex justify-between text-gray-700 dark:text-gray-200">
+                  <span>{t.title ?? "Untitled Tour"}</span>
                   <span className="text-gray-400 text-sm">
-                    {t.start_date
-                      ? new Date(t.start_date).toLocaleDateString()
-                      : "N/A"}
+                    {t.start_date ? new Date(t.start_date).toLocaleDateString() : "N/A"}
                   </span>
                 </li>
-              ))}
+              )) : <li className="py-2 text-gray-500">No recent tours</li>}
             </ul>
           )}
         </div>

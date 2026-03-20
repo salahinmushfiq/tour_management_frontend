@@ -538,13 +538,13 @@
 
 
 
-
+//src/pages/dashboard/shared/pages/Tours.jsx
 // ----------- Main TourDetails Component -----------
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { GuidesTab, OverviewTab, ParticipantsTab, OffersTab, SimpleTourDetails } from "../../";
-import { useAuth } from "../../../../context/AuthContext";
-import axiosInstance from "../../../../api/axiosInstance";
+import { GuidesTab, OverviewTab, ParticipantsTab, OffersTab, SimpleTourDetails } from "./../../../components";
+import { useAuth } from "../../../context/AuthContext";
+import api from "../../../api/axiosInstance";
 
 export default function TourDetails() {
   const { id } = useParams();
@@ -576,7 +576,7 @@ export default function TourDetails() {
     async function fetchTour() {
       setLoading(true);
       try {
-        const res = await axiosInstance.get(`/tours/${id}/`);
+        const res = await api.get(`/tours/${id}/`);
         setTour(res.data);
         // console.log("res.data");
         // console.log(res.data);
@@ -620,7 +620,7 @@ export default function TourDetails() {
     }
 
     try {
-      const res = await axiosInstance.patch(`/tours/${id}/`, {
+      const res = await api.patch(`/tours/${id}/`, {
         description: formData.description,
         category: formData.category,
         cost_per_person: parseFloat(formData.cost_per_person),

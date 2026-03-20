@@ -1,7 +1,9 @@
+//dashboard/shared/pages/TourCreate.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../../context/AuthContext";
-import axiosInstance from "../../../../api/axiosInstance";
+import { useAuth } from "../../../context/AuthContext";
+import axiosInstance from "../../../api/axiosInstance";
+import { useUIStore } from "../../../store/useUIStore";
 
 export default function TourCreate() {
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ export default function TourCreate() {
   });
 
   const [saving, setSaving] = useState(false);
-  const theme = localStorage.getItem("theme") || "light";
+  const theme = useUIStore((state) => state.theme);
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -34,21 +36,36 @@ export default function TourCreate() {
   };
 
   // Submit form to create tour
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setSaving(true);
+
+  //   try {
+  //     await axiosInstance.post("/tours/", formData);
+  //     alert("Tour created successfully!");
+  //     if (user.role === "admin") {
+  //       navigate("/dashboard/admin/tours");
+  //     } else {
+  //       navigate("/dashboard/organizer/tours");
+  //     }
+  //   } catch (err) {
+  //     console.error("Failed to create tour", err);
+  //     alert("Failed to create tour. Please check your inputs and permissions.");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-
     try {
-      await axiosInstance.post("/tours/", formData);
+      await createTour(formData); // use API helper
       alert("Tour created successfully!");
-      if (user.role === "admin") {
-        navigate("/dashboard/admin/tours");
-      } else {
-        navigate("/dashboard/organizer/tours");
-      }
+      navigate(user.role === "admin" ? "/dashboard/admin/tours" : "/dashboard/organizer/tours");
     } catch (err) {
-      console.error("Failed to create tour", err);
-      alert("Failed to create tour. Please check your inputs and permissions.");
+      console.error(err);
+      alert("Failed to create tour. Please check your inputs.");
     } finally {
       setSaving(false);
     }
