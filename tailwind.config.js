@@ -34,6 +34,25 @@ module.exports = {
           DEFAULT: '#F9FAFB', // soft white
         },
       },
+      keyframes: {
+        bounce: {
+          '0%, 80%, 100%': { transform: 'scale(.95)' },
+          '40%': { transform: 'scale(1)' },
+        },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        }
+      },
+      animation: {
+        bounce: 'bounce 1.8s infinite ease-in-out',
+        'bounce-slow': 'bounce 1.8s infinite ease-in-out',
+        'bounce-delay-200': 'bounce 1.4s 0.4s infinite ease-in-out',
+        'bounce-delay-400': 'bounce 1.4s 0.8s infinite ease-in-out',
+        shimmer: 'shimmer 2s infinite'
+      },
+      perspective: {
+        '1000': '1000px',
+      }
     },
   },
   plugins: [],
