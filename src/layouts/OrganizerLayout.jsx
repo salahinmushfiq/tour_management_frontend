@@ -2,18 +2,20 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useSidebar } from '../context/SidebarContext';
-import { DashboardNavbar,DashboardSidebar } from '../pages/dashboard';
+import { DashboardNavbar,DashboardSidebar } from '../components';
+import { useUIStore } from '../store/useUIStore';
 const OrganizerLayout = () => {
   const { user } = useAuth();
-  const { collapsed, setCollapsed } = useSidebar();
-
+  const isCollapsed = useUIStore((state) => state.isSidebarCollapsed);
+  const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  
+  
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <DashboardSidebar role={user.role} collapsed={collapsed} onToggle={setCollapsed} />
+      <DashboardSidebar role={user.role} collapsed={isCollapsed} onToggle={toggleSidebar} />
 
       <div className="flex flex-col flex-1">
-        <DashboardNavbar variant={user.role} toggleSidebar={() => setCollapsed(prev => !prev)}/>
+        <DashboardNavbar variant={user.role}  toggleSidebar={toggleSidebar} collapsed={isCollapsed}/>
         <main className="flex-1 p-4">
           <Outlet />
         </main>
@@ -23,4 +25,5 @@ const OrganizerLayout = () => {
 };
 
 export default OrganizerLayout;
+
 

@@ -83,8 +83,7 @@ const StickyStoryGallery = () => {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative w-full h-screen overflow-hidden">
-      {stories.map((story, i) => (
+<section ref={containerRef} className="relative w-full min-h-screen overflow-hidden">      {stories.map((story, i) => (
         <div
           key={crypto.randomUUID()}
           ref={(el) => (sectionsRef.current[i] = el)}

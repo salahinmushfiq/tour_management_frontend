@@ -5,13 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useTheme } from '@emotion/react';
-import { ThemeToggle, TooltipWrapper } from '../pages/dashboard';
+import { ThemeToggle, TooltipWrapper } from '../components';
 
 
-const TouristDashboardLayout = ({ children }) => {
+const TouristDashboardLayout = () => {
   const { user } = useAuth();
   const { theme } = useTheme()
-  console.log(user);
+  // console.log(user);
   return (
     <div className="bg-gray dark:bg-gray-900 text-gray-900 dark:text-white ">
       <Navbar className="bg-gray dark:bg-gray-900 text-black dark:text-white"/>

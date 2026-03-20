@@ -1,12 +1,12 @@
+//src/pages/dashboard/shared/components/DashboardNavbar.jsx
 import React from 'react';
 import { Menu } from 'lucide-react';
-import { useTheme } from '../hooks/useTheme';
-import TooltipWrapper from './TooltipWrapper';
-import ThemeToggle from './ThemeToggle';
-import ProfileDropdown from './ProfileDropdown';
+import {TooltipWrapper,ThemeToggle,ProfileDropdown} from "../"
+import { useUIStore } from '../../store/useUIStore';
+
 
 const DashboardNavbar = ({ variant = 'default', toggleSidebar, collapsed }) => {
-  const { theme } = useTheme();
+  const theme = useUIStore((state) => state.theme);
 
   const displayName = variant.charAt(0).toUpperCase() + variant.slice(1);
 
@@ -17,7 +17,7 @@ const DashboardNavbar = ({ variant = 'default', toggleSidebar, collapsed }) => {
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         className="text-gray-700 dark:text-gray-300 p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <Menu />
+        <Menu/>
       </button>
 
       <div className="text-lg font-semibold select-none">

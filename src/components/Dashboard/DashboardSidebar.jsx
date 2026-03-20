@@ -1,3 +1,4 @@
+//dashboard/shared/components/DashboardSidebar
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -16,13 +17,13 @@ const navConfig = {
     { to: '/dashboard/admin', label: 'Dashboard', icon: <Home size={20} /> },
     { to: '/dashboard/admin/tours', label: 'Tours', icon: <ListCheck size={20} /> },
     { to: '/dashboard/admin/users', label: 'Users', icon: <Users size={20} /> },
-    { to: '/dashboard/admin/tours/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
+    { to: '/dashboard/admin/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
   ],
   organizer: [
     { to: '/dashboard/organizer', label: 'Dashboard', icon: <Home size={20} /> },
     { to: '/dashboard/organizer/tours', label: 'My Tours', icon: <ListCheck size={20} /> },
     { to: '/dashboard/organizer/tours/create', label: 'Create Tour', icon: <PlusSquare size={20} /> },
-    { to: '/dashboard/organizer/tours/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
+    { to: '/dashboard/organizer/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
   ],
   guide: [
     { to: '/dashboard/guide', label: 'Dashboard', icon: <Home size={20} /> },
@@ -78,7 +79,7 @@ const DashboardSidebar = ({ role, collapsed, onToggle }) => {
               key={to}
               to={to}
               onClick={onToggle ? () => {
-                if (!isLargeScreen) onToggle(true); // hide sidebar on small screen after click
+                if (!isLargeScreen) onToggle(); // hide sidebar on small screen after click
               } : undefined}
               className={`flex items-center gap-4 px-4 py-3 rounded-lg mb-2 transition-colors ${
                 isActive
