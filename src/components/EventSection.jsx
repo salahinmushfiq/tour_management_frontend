@@ -1,313 +1,96 @@
-// import { useState } from "react";
-// import { AnimatePresence, motion } from "framer-motion";
-// import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
+//src/components/EventSection.jsx
 
-// // Dummy events
-// const allEvents = [
-//   {
-//     id: 1,
-//     title: "Cox’s Bazar Beach Trek",
-//     location: "Cox’s Bazar",
-//     date: new Date("2025-07-20"),
-//     category: "Adventure",
-//     budget: "BDT 3500",
-//     people: 24,
-//     image: "https://images.pexels.com/photos/25288251/pexels-photo-25288251.jpeg",
-//     shortDescription: "Explore the world's longest sea beach with expert guides.",
-//     fullDescription: "Full trip details here...",
-//   },
-//   {
-//     id: 2,
-//     title: "Heritage Walk in Old Dhaka",
-//     location: "Dhaka",
-//     date: new Date("2025-07-23"),
-//     category: "Heritage",
-//     budget: "BDT 2000",
-//     people: 18,
-//     image: "https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg",
-//     shortDescription: "Walk through the alleys of Old Dhaka with food and culture.",
-//     fullDescription: "Full trip details here...",
-//   },
-//   {
-//     id: 3,
-//     title: "Sundarban Eco Tour",
-//     location: "Khulna",
-//     date: new Date("2025-07-25"),
-//     category: "Eco",
-//     budget: "BDT 4500",
-//     people: 32,
-//     image: "https://images.pexels.com/photos/1059078/pexels-photo-1059078.jpeg",
-//     shortDescription: "A 3-day boat tour inside the mangrove forest.",
-//     fullDescription: "Full trip details here...",
-//   },
-//   // Add more events if needed
-// ];
-
-// const categories = ["Adventure", "Heritage", "Eco"];
-
-// export default function EventDiscoverySection() {
-//   const [search, setSearch] = useState("");
-//   const [selectedCategories, setSelectedCategories] = useState([]);
-//   const [startDate, setStartDate] = useState(null);
-//   const [endDate, setEndDate] = useState(null);
-//   const [visibleCount, setVisibleCount] = useState(4);
-//   const [selectedEvent, setSelectedEvent] = useState(null);
-
-//   const toggleCategory = (cat) =>
-//     setSelectedCategories((prev) =>
-//       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-//     );
-
-//   const clearFilters = () => {
-//     setSearch("");
-//     setSelectedCategories([]);
-//     setStartDate(null);
-//     setEndDate(null);
-//   };
-
-//   const filteredEvents = allEvents.filter((event) => {
-//     const matchSearch =
-//       event.title.toLowerCase().includes(search.toLowerCase()) ||
-//       event.location.toLowerCase().includes(search.toLowerCase());
-
-//     const matchCategory =
-//       selectedCategories.length === 0 ||
-//       selectedCategories.includes(event.category);
-
-//     const matchDate =
-//       (!startDate || event.date >= startDate) &&
-//       (!endDate || event.date <= endDate);
-
-//     return matchSearch && matchCategory && matchDate;
-//   });
-
-//   const visibleEvents = filteredEvents.slice(0, visibleCount);
-
-//   return (
-//     <section className="bg-gray-900 text-white py-20">
-//       <div className="max-w-6xl mx-auto px-4">
-//         <h2 className="text-3xl font-bold text-center mb-10">Find Your Tour</h2>
-
-//         {/* Filters */}
-//         <div className="bg-white/5 backdrop-blur p-6 rounded-lg mb-10 space-y-4">
-//           <div className="flex flex-col md:flex-row gap-4">
-//             <input
-//               type="text"
-//               placeholder="Search by title or location"
-//               value={search}
-//               onChange={(e) => setSearch(e.target.value)}
-//               className="flex-1 px-4 py-2 rounded bg-gray-800 text-white placeholder-gray-400 border border-gray-700"
-//             />
-
-//             <DatePicker
-//               selected={startDate}
-//               onChange={(date) => setStartDate(date)}
-//               placeholderText="Start Date"
-//               className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-full md:w-40"
-//             />
-//             <DatePicker
-//               selected={endDate}
-//               onChange={(date) => setEndDate(date)}
-//               placeholderText="End Date"
-//               className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-full md:w-40"
-//             />
-//           </div>
-
-//           {/* Category Chips */}
-//           <div className="flex flex-wrap gap-3">
-//             {categories.map((cat) => (
-//               <button
-//                 key={cat}
-//                 onClick={() => toggleCategory(cat)}
-//                 className={`px-3 py-1 rounded-full border ${
-//                   selectedCategories.includes(cat)
-//                     ? "bg-indigo-600 text-white"
-//                     : "bg-gray-700 text-gray-200"
-//                 }`}
-//               >
-//                 {cat}
-//               </button>
-//             ))}
-//             {(search || selectedCategories.length || startDate || endDate) && (
-//               <button
-//                 onClick={clearFilters}
-//                 className="ml-auto text-sm text-red-400 underline"
-//               >
-//                 Clear All Filters
-//               </button>
-//             )}
-//           </div>
-//         </div>
-
-//         {/* Event Cards */}
-//         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-//           {visibleEvents.map((event) => (
-//             <motion.div
-//               key={event.id}
-//               whileHover={{ scale: 1.02 }}
-//               className="bg-white/10 rounded-lg overflow-hidden shadow-lg cursor-pointer"
-//               onClick={() => setSelectedEvent(event)}
-//             >
-//               <img
-//                 src={event.image}
-//                 alt={event.title}
-//                 className="h-40 w-full object-cover hidden md:flex"
-//               />
-//               <div className="p-4 space-y-1">
-//                 <h3 className="font-semibold text-lg">{event.title}</h3>
-//                 <p className="text-sm text-gray-300">{event.location}</p>
-//                 <p className="text-sm text-gray-400">
-//                   {event.date.toDateString()}
-//                 </p>
-//                 <span className="text-xs bg-indigo-600 px-2 py-1 rounded-full inline-block mt-2">
-//                   {event.category}
-//                 </span>
-//               </div>
-//             </motion.div>
-//           ))}
-//         </div>
-
-//         {/* Load More */}
-//         {visibleCount < filteredEvents.length && (
-//           <div className="text-center mt-8">
-//             <button
-//               onClick={() => setVisibleCount((c) => c + 4)}
-//               className="px-6 py-2 bg-indigo-600 rounded-full text-white hover:bg-indigo-700 transition"
-//             >
-//               Load More
-//             </button>
-//           </div>
-//         )}
-
-//         {/* Modal */}
-//         <AnimatePresence>
-//           {selectedEvent && (
-//             <motion.div
-//               className="fixed inset-0 bg-black/80 flex z-50 px-4 overflow-y-auto py-8"
-//               initial={{ opacity: 0 }}
-//               animate={{ opacity: 1 }}
-//               exit={{ opacity: 0 }}
-//             >
-//               <motion.div
-//                 className="bg-white text-black rounded-xl max-w-xl w-full p-6 relative overflow-hidden"
-//                 initial={{ y: 50, opacity: 0 }}
-//                 animate={{ y: 0, opacity: 1 }}
-//                 exit={{ y: 50, opacity: 0 }}
-//               >
-//                 <button
-//                   className="absolute top-3 right-4 text-xl text-gray-500 hover:text-black"
-//                   onClick={() => setSelectedEvent(null)}
-//                 >
-//                   ✕
-//                 </button>
-//                 <img
-//                   src={selectedEvent.image}
-//                   alt={selectedEvent.title}
-//                   className="w-full h-56 object-cover rounded-lg mb-4"
-//                 />
-//                 <h3 className="text-2xl font-bold mb-2">{selectedEvent.title}</h3>
-//                 <p className="text-sm text-gray-600 mb-3">
-//                   {selectedEvent.date.toDateString()} – {selectedEvent.location}
-//                 </p>
-//                 <p className="mb-4 text-gray-800">{selectedEvent.fullDescription}</p>
-//                 <div className="flex flex-wrap text-sm text-gray-700 gap-4">
-//                   <span>💵 {selectedEvent.budget}</span>
-//                   <span>👥 {selectedEvent.people} joined</span>
-//                   <span>🏷️ {selectedEvent.category}</span>
-//                 </div>
-//               </motion.div>
-//             </motion.div>
-//           )}
-//         </AnimatePresence>
-//       </div>
-//     </section>
-//   );
-// }
-
-// src/components/EventSection.jsx
-import React, { useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useDebounce } from "use-debounce";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import Chip from "./EventCategoryChip";
 import SkeletonCard from "./EventSkeletonCard";
 import EventCard from "./EventCard";
 import EventModal from "./EventModal";
 
-export default function EventSection() {
-  const [events, setEvents] = useState([]);
-  const [nextPage, setNextPage] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [loading, setLoading] = useState(false);
+import { useEvents } from "../hooks/useEvents"; 
 
-  // Filters
+/* ---------------------- Compass Loader Component ---------------------- */
+export function CompassLoader() {
+  return (
+    <div className="relative flex items-center justify-center w-6 h-6">
+      <div className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
+      <div className="absolute inset-0 border border-white/40 rounded-full" />
+      <motion.div
+        className="relative w-full h-full flex items-center justify-center"
+        animate={{ rotate: 360 }}
+        transition={{
+          repeat: Infinity,
+          duration: 1.5,
+          ease: "circIn",
+        }}
+      >
+        <div className="relative flex flex-col items-center">
+          <div className="w-0 h-0 border-l-[2px] border-l-transparent border-r-[2px] border-r-transparent border-b-[8px] border-b-red-500" />
+          <div className="w-0 h-0 border-l-[2px] border-l-transparent border-r-[2px] border-r-transparent border-t-[8px] border-t-white" />
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ---------------------- Main Event Section ---------------------- */
+export default function EventSection() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL;
+  const filters = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      category: category || undefined,
+      location: location || undefined,
+      startDate: startDate || undefined,
+      endDate: endDate || undefined
+    }),
+    [debouncedSearch, category, location, startDate, endDate]
+  );
 
-  // Build query string with current filters and optional page URL
-  const buildQuery = (pageUrl) => {
-    if (pageUrl) return pageUrl; // server-provided next page already includes params
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading,isError } = useEvents(filters);
+  const events = data?.pages.flatMap((page) => page.results) || [];
 
-    const params = new URLSearchParams();
-    params.append("page_size", 12);
-    if (search) params.append("search", search);
-    if (category) params.append("category", category);
-    if (location) params.append("start_location", location);
-    if (startDate) params.append("start_date", startDate.toISOString().split("T")[0]);
-    if (endDate) params.append("end_date", endDate.toISOString().split("T")[0]);
+  const categories = useMemo(() => [...new Set(events.map((e) => e.category))].filter(Boolean), [events]);
+  const locations = useMemo(() => [...new Set(events.map((e) => e.start_location))].filter(Boolean), [events]);
 
-    return `${API_BASE}/tours/?${params.toString()}`;
-  };
-
-  // Fetch tours from backend
-  const fetchEvents = async (pageUrl = null, replace = false) => {
-    try {
-      setLoading(true);
-      const url = buildQuery(pageUrl);
-      const res = await axios.get(url);
-
-      const data = Array.isArray(res.data.results) ? res.data.results : [];
-      setEvents((prev) => (replace ? data : [...prev, ...data]));
-      setNextPage(res.data.next);
-    } catch (err) {
-      console.error("Failed to fetch tours:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial fetch or when filters change
+  /* --- Journey Sync Logic --- */
+    
   useEffect(() => {
-    fetchEvents(null, true); // replace previous results
-  }, [search, category, location, startDate, endDate]);
+    const id = setTimeout(() => {
+      // Tell GSAP the page height changed so the trail doesn't end early
+      ScrollTrigger.refresh();
+    }, 100);
 
-  // Unique categories & locations for filter dropdowns
-  const categories = useMemo(
-    () => [...new Set(events.map((e) => e.category))].filter(Boolean),
-    [events]
-  );
-  const locations = useMemo(
-    () => [...new Set(events.map((e) => e.start_location))].filter(Boolean),
-    [events]
-  );
+    return () => clearTimeout(id);
+  }, [events.length]);
+  
+  const handleEventClick = useCallback((event) => {
+    setSelectedEvent(event);
+  }, []);
 
-  const clearFilter = (filterName) => {
-    switch (filterName) {
-      case "category": setCategory(""); break;
-      case "location": setLocation(""); break;
-      case "search": setSearch(""); break;
-      case "startDate": setStartDate(null); break;
-      case "endDate": setEndDate(null); break;
-    }
-  };
+  const clearFilter = useCallback((filterName) => {
+    const setters = {
+      search: setSearch,
+      category: setCategory,
+      location: setLocation,
+      startDate: setStartDate,
+      endDate: setEndDate
+    };
+
+    setters[filterName]?.(filterName.includes("Date") ? null : "");
+  }, []);
 
   const clearAllFilters = () => {
     setSearch(""); setCategory(""); setLocation(""); setStartDate(null); setEndDate(null);
@@ -316,104 +99,189 @@ export default function EventSection() {
   const anyFilterActive = search || category || location || startDate || endDate;
 
   return (
-    <section className="bg-gray-900 text-white px-4 pb-20 relative z-10 pt-12">
+    <section id="events" className=" text-white px-4 pb-20 pt-12 w-full relative">
       <div className="max-w-7xl mx-auto">
+        
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           className="text-center mb-10"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-2">Explore Our Tour Events</h2>
-          <p className="text-lg text-gray-300">Discover amazing experiences curated by top organizers.</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">Explore Our Events</h2>
+          <p className="text-lg text-gray-400 ">The journey of a thousand miles begins with a single step."</p>
         </motion.div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap justify-center gap-4 mb-4">
+        {/* Filters Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <input
             type="search"
-            placeholder="Search by title or location"
+            placeholder="Search tours..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-64"
+            /* RESTORED: bg-gray-800/90 and border-gray-600 */
+            className="px-4 py-2 rounded-lg bg-gray-800/90 text-white border border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-gray-400 shadow-xl"
           />
+          
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
+            className="px-4 py-2 rounded-lg bg-gray-800/90 text-white border border-gray-600 outline-none cursor-pointer hover:bg-gray-700 transition shadow-xl"
           >
-            <option value="">All Categories</option>
-            {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+            <option value="" className="bg-gray-900">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat} className="bg-gray-900">{cat}</option>
+            ))}
           </select>
+
           <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-48"
+            className="px-4 py-2 rounded-lg bg-gray-800/90 text-white border border-gray-600 outline-none cursor-pointer hover:bg-gray-700 transition shadow-xl"
           >
-            <option value="">All Locations</option>
-            {locations.map((loc) => <option key={loc} value={loc}>{loc}</option>)}
+            <option value="" className="bg-gray-900">All Locations</option>
+            {locations.map((loc) => (
+              <option key={loc} value={loc} className="bg-gray-900">
+                {loc.includes(" (") ? loc.split(" (")[0] : loc}
+              </option>
+            ))}
           </select>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            placeholderText="Start Date"
-            className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-36"
-          />
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            placeholderText="End Date"
-            className="px-4 py-2 rounded bg-gray-800 text-white border border-gray-700 w-36"
-          />
+
+          {/* For DatePicker, ensure you wrap it or pass the className correctly */}
+          <div className="relative custom-datepicker">
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              placeholderText="From Date"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800/90 text-white border border-gray-600 outline-none shadow-xl"
+            />
+          </div>
+
+          <div className="relative custom-datepicker">
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              placeholderText="To Date"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800/90 text-white border border-gray-600 outline-none shadow-xl"
+            />
+          </div>
         </div>
 
         {/* Filter Chips */}
-        {anyFilterActive && (
-          <div className="flex flex-wrap justify-center mb-6">
-            {search && <Chip label={`Search: ${search}`} onRemove={() => clearFilter("search")} />}
-            {category && <Chip label={`Category: ${category}`} onRemove={() => clearFilter("category")} />}
-            {location && <Chip label={`Location: ${location}`} onRemove={() => clearFilter("location")} />}
-            {startDate && <Chip label={`Start: ${startDate.toDateString()}`} onRemove={() => clearFilter("startDate")} />}
-            {endDate && <Chip label={`End: ${endDate.toDateString()}`} onRemove={() => clearFilter("endDate")} />}
-            <button
-              onClick={clearAllFilters}
-              className="ml-4 px-3 py-1 rounded-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition"
+        {/* Filter Chips */}
+        <AnimatePresence>
+          {anyFilterActive && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="flex flex-wrap items-center gap-2 mb-8 overflow-hidden"
             >
-              Clear All Filters
-            </button>
-          </div>
+              {search && <Chip label={`"${search}"`} onRemove={() => clearFilter("search")} />}
+              {category && <Chip label={category} onRemove={() => clearFilter("category")} />}
+              
+              {/* UPDATED: Clean location name for the Chip */}
+              {location && (
+                <Chip 
+                  label={location.includes(" (") ? location.split(" (")[0] : location} 
+                  onRemove={() => clearFilter("location")} 
+                />
+              )}
+
+              {startDate && <Chip label={`Starts: ${startDate.toLocaleDateString()}`} onRemove={() => clearFilter("startDate")} />}
+              
+              <button
+                onClick={clearAllFilters}
+                className="text-xs font-semibold text-red-400 hover:text-red-300 underline underline-offset-4 ml-2"
+              >
+                Reset All
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Event Cards Grid */}
+      <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 min-h-[400px]">
+        {isLoading ? (
+          // Initial Load Skeletons
+          Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={`initial-${i}`} />)
+        ) : (
+          <>
+            {/* Existing Events */}
+            {events.map((event) => (
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0.3, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.2 }}
+                transition={{ duration: 0.5 }}
+              >
+                <EventCard event={event} onClick={handleEventClick} />
+              </motion.div>
+            ))}
+
+            {/* "Loading More" Skeletons */}
+            {isFetchingNextPage && 
+              Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={`next-page-skel-${i}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <SkeletonCard />
+                </motion.div>
+              ))
+            }
+          </>
         )}
 
-        {/* Event Cards */}
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-h-[24rem]">
-          {loading && events.length === 0
-            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-            : events.map((event) => (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <EventCard event={event} onClick={() => setSelectedEvent(event)} />
-                </motion.div>
-              ))}
-        </motion.div>
+        {/* Empty State */}
+        {!isLoading && events.length === 0 && (
+          <div className="col-span-full py-20 text-center text-gray-500">
+            No tours found matching your search. Try adjusting the filters!
+          </div>
+        )}
+      </motion.div>
 
         {/* Load More Button */}
-        {nextPage && (
-          <div className="text-center mt-8">
+        {hasNextPage && (
+          <div className="flex justify-center mt-16 pb-12">
             <button
-              onClick={() => fetchEvents(nextPage)}
-              className="px-6 py-2 bg-brand rounded-full text-white hover:bg-brand-dark transition"
-              disabled={loading}
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className={`
+                relative group flex items-center gap-4 px-10 py-5 
+                rounded-full text-white font-bold transition-all duration-500
+                ${isFetchingNextPage 
+                  ? "bg-gray-800 cursor-not-allowed" 
+                  : "bg-gradient-to-r from-blue-600 to-emerald-600 hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"}
+              `}
             >
-              {loading ? "Loading..." : "Load More"}
+              {isFetchingNextPage ? (
+                <>
+                  <CompassLoader />
+                  <span className="animate-pulse tracking-wide text-gray-400">Discovering more...</span>
+                </>
+              ) : (
+                <>
+                  <span className="tracking-wide">Expand the Journey</span>
+                  <svg 
+                    className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
+              )}
             </button>
           </div>
         )}
 
+        {/* Modal Overlay */}
         <EventModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
       </div>
     </section>

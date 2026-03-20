@@ -26,18 +26,10 @@ const features = [
 
 export default function About() {
   return (
-    <section className="relative overflow-hidden py-4 bg-black/10 backdrop-blur-sm">
-      {/* Background */}
-      {/* <div className="absolute inset-0 -z-10">
-        <img
-          src="https://images.pexels.com/photos/414144/pexels-photo-414144.jpeg?auto=format&fit=crop&w=1600&q=80"
-          alt="Ocean adventure theme"
-          className="w-full h-full object-cover object-center opacity-80"
-        />
-      </div> */}
+    <section id="features" className="relative overflow-hidden py-4 bg-black/10 backdrop-blur-sm">
 
       {/* Content */}
-      <div className="relative max-w-6xl mx-auto px-6 z-10">
+      <div className="relative max-w-6xl mx-auto px-6 z-10 mt-20">
         {/* 👇 SVG Decorative Shape */}
         <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 -z-10 opacity-30 pointer-events-none">
           <svg

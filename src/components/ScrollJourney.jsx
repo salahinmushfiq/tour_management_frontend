@@ -1,124 +1,81 @@
-// import { useEffect, useRef } from "react";
-// import gsap from "gsap";
-// import { ScrollTrigger } from "gsap/ScrollTrigger";
-// import { MotionPathPlugin } from "gsap/MotionPathPlugin";
-
-// gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
-
-// const ScrollJourney = () => {
-//   const markerRef = useRef(null);
-
-//   useEffect(() => {
-//     gsap.to(markerRef.current, {
-//       scrollTrigger: {
-//         trigger: "#journey-wrapper",
-//         start: "top top",
-//         end: "bottom bottom",
-//         scrub: 1,
-//       },
-//       motionPath: {
-//         path: "#trekPath",
-//         align: "#trekPath",
-//         autoRotate: false,
-//         alignOrigin: [0.5, 0.5],
-//       },
-//     });
-//   }, []);
-
-//   return (
-//     <div className="absolute left-auto right-auto top-0 hidden md:block h-full w-20 z-10 pointer-events-none">
-//       <svg
-//         id="journeySVG"
-//         className="h-full w-full"
-//         viewBox="0 0 100 1000"
-//         preserveAspectRatio="none"
-//         xmlns="http://www.w3.org/2000/svg"
-//       >
-//         <path
-//           id="trekPath"
-//           d="M50 0 
-//              C 50 150, 30 250, 50 350 
-//              C 90 450, 30 550, 50 650 
-//              C 100 750, 30 850, 50 1000"
-//           stroke="#7f6d5f"
-//           strokeDasharray="10 10"
-//           strokeWidth="4"
-//           fill="none"
-//         />
-//         <circle ref={markerRef} r="8" fill="#f97316" />
-//       </svg>
-//     </div>
-//   );
-// };
-
-// export default ScrollJourney;
-
-
-import { useEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 
 gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
-const ScrollJourney = () => {
+export default function ScrollJourney() {
+  const pathRef = useRef(null);
   const markerRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.to(markerRef.current, {
+      const path = pathRef.current;
+      const pathLength = path.getTotalLength();
+
+      gsap.set(path, {
+        strokeDasharray: pathLength,
+        strokeDashoffset: pathLength,
+      });
+
+      const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: "#journey-wrapper",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1,
-        },
+          trigger: "#journey-track",
+          // SYNC FIX: Start when top hits top, end when bottom hits bottom
+          start: "top top", 
+          end: "bottom bottom", 
+          scrub: true, // true (or 0) provides the most immediate "lock"
+          invalidateOnRefresh: true, 
+        }
+      });
+
+      tl.to(path, {
+        strokeDashoffset: 0,
+        ease: "none",
+      }, 0)
+      .to(markerRef.current, {
         motionPath: {
-          path: "#trekPath",
-          // Removed align because SVG scale mismatch breaks accuracy
-          autoRotate: false,
+          path: path,
+          align: path,
+          autoRotate: true,
+          alignOrigin: [0.5, 0.5],
         },
         ease: "none",
-      });
-    });
+      }, 0);
+
+    }, "#journey-track");
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <div className="absolute left-1/2 transform -translate-x-1/2 top-0 hidden md:block h-full w-24 z-10 pointer-events-none">
+    <div className="absolute inset-0 pointer-events-none w-full h-full z-0">
       <svg
-        id="journeySVG"
-        className="h-full w-full"
-        viewBox="0 0 100 1000"
-        preserveAspectRatio="xMidYMid meet"
-        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full"
+        viewBox="0 0 100 1000" 
+        preserveAspectRatio="none"
+        fill="none"
       >
         <path
-          id="trekPath"
-          d="
-            M50 0
-            C 20 50, 80 100, 50 150
-            C 0 200, 100 250, 50 300
-            C 80 320, 20 380, 50 400
-
-            C 60 420, 60 460, 50 480
-            C 40 500, 40 540, 50 560
-
-            C 0 600, 100 640, 50 680
-            C 20 720, 80 760, 50 800
-            C 0 850, 100 900, 50 950
-            C 40 980, 60 980, 50 1000
-          "
-          stroke="#7f6d5f"
-          strokeDasharray="10 10"
-          strokeWidth="4"
-          fill="none"
+          ref={pathRef}
+          // Straightened the path slightly to keep the marker closer to the center-line
+          d="M50,0 C65,250 35,500 65,750 S50,1000 50,1000"
+          stroke="url(#journey-grad)"
+          strokeWidth="1"
+          strokeDasharray="10,15"
         />
-        <circle ref={markerRef} r="8" fill="#f97316" />
+        <defs>
+          <linearGradient id="journey-grad" x1="0" y1="0" x2="0" y2="1000" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#10b981" />
+          </linearGradient>
+        </defs>
       </svg>
+
+      <div ref={markerRef} className="absolute top-0 left-0 w-6 h-6 -ml-3 -mt-3 z-10">
+        <div className="w-full h-full bg-blue-500 rounded-full shadow-[0_0_15px_#3b82f6]" />
+      </div>
     </div>
   );
-};
-
-export default ScrollJourney;
+}

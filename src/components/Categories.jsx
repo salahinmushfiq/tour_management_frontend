@@ -24,7 +24,7 @@ export default function Categories() {
   return (
     <section className=" py-20 backdrop-blur-md bg-black/10">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-dark mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
           Explore by <span className="text-brand">Category</span>
         </h2>
 
