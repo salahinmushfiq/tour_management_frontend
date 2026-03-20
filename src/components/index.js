@@ -1,5 +1,5 @@
 export { default as TourCard } from "./Dashboard/Tourist/TourCard"
-export { default as TourDetails } from "./Dashboard/Tourist/TouristTourDetails"
+export { default as TourDetails } from "./Dashboard/Tourist/TourDetails"
 
 
 export { default as SessionModal } from "./SessionModal";
