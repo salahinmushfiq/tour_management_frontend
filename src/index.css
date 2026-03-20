@@ -5,5 +5,45 @@
 html, body {
   overflow-x: hidden;
   max-width: 100%;
+  scroll-padding-top: 5rem; 
+  scroll-behavior: smooth;
+}
+.will-change-transform {
+  will-change: transform, opacity;
+}
+/* .misty-transition {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+} */
+
+/* Fix for react-datepicker popup colors */
+.react-datepicker {
+  background-color: #1f2937 !important; /* gray-800 */
+  border: 1px solid #4b5563 !important; /* gray-600 */
+  color: white !important;
 }
 
+.react-datepicker__header {
+  background-color: #111827 !important; /* gray-900 */
+  border-bottom: 1px solid #4b5563 !important;
+}
+
+.react-datepicker__day, .react-datepicker__day-name, .react-datepicker__current-month {
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #3b82f6 !important; /* blue-500 */
+}
