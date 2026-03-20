@@ -339,7 +339,7 @@ const Sidebar = ({ tour }) => (
             <p className="font-bold text-sm truncate">{tour.organizer_email}</p>
           </div>
         </div>
-        <button className="w-full py-4 bg-white bg-brand/90 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+        <button className="w-full py-4 bg-brand/90 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
           Message Organizer
         </button>
       </div>
