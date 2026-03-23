@@ -1,17 +1,3 @@
-// import React from 'react';
-
-// const OrganizerBookings = () => {
-//   return (
-//     <div className="p-6 bg-white dark:bg-dark min-h-screen">
-//       <h1 className="text-2xl font-bold mb-6">Bookings</h1>
-//       <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
-//         <p className="text-gray-600 dark:text-white">No bookings yet.</p>
-//         {/* Future: booking table or cards will go here */}
-//       </div>
-//     </div>
-//   );
-// };
-//dashboard/organizer/OrganizerBookings.jsx
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../../context/AuthContext";
@@ -49,7 +35,7 @@ export default function OrganizerBookings() {
     enabled: !!user?.id,
     keepPreviousData: true,
     retry: 1,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false
   });
 
   const bookings = data?.bookings ?? [];
@@ -97,7 +83,10 @@ export default function OrganizerBookings() {
         flex: 1,
         valueGetter: (params) => params.row.tour?.title,
       },
-      { field: "amount", headerName: "Amount", type: "number", flex: 0.6 },
+      { field: "amount", 
+        headerName: "Amount", 
+        type: "number", 
+        flex: 0.6 },
       {
         field: "paid",
         headerName: "Paid",
@@ -279,15 +268,12 @@ export default function OrganizerBookings() {
   // Render
   // ==============================
   return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100">
-        Bookings
-      </h1>
-
+    <div style={{ width: '100%', background: theme === 'dark' ? '#1e293b' : 'white' }}>
       {isLoading ? (
         <DataGridSkeleton
           columns={columns}
           rowCount={pageSize}
+          theme={theme}
         />
       ) : bookings.length === 0 ? (
         <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">

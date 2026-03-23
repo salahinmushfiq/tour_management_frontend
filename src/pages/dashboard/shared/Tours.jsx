@@ -8,7 +8,7 @@ import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useUIStore } from "../../../store/useUIStore";
-import DataGridSkeleton from "../../../components/DataGridSkeleton";
+import {DataGridSkeleton} from "../../../components";
 
 // ─── Custom Toolbar ─────────────────────────────────────────────
 function CustomToolbar({ rows, searchText, setSearchText }) {
@@ -177,11 +177,14 @@ export default function Tours() {
   if (error) return <div className="text-red-500">Failed to load tours.</div>;
 
   return (
-    <div className="inset-0 max-w-full px-4">
+    <div style={{ width: '100%', background: theme === 'dark' ? '#1e293b' : 'white' }}>
       {isLoading ? (
-        <DataGridSkeleton columns={columns} rowCount={pageSize} />
+        <DataGridSkeleton 
+        columns={columns} 
+        rowCount={pageSize} 
+        theme={theme}
+        />
       ) : (
-        <div className="overflow-x-auto w-full max-w-full">
           <DataGrid
             rows={filteredTours}
             columns={columns}
@@ -210,7 +213,6 @@ export default function Tours() {
             }}
             sx={sx}
           />
-        </div>
       )}
     </div>
   );

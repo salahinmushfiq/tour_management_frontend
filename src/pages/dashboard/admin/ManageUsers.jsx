@@ -3,45 +3,32 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { MenuItem, Select, FormControl, Snackbar, Alert } from '@mui/material';
 import { useAuth } from '../../../context/AuthContext';
-import axiosInstance from '../../../api/axiosInstance'; // your axios wrapper
+import api from '../../../api/axiosInstance'; 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUIStore } from '../../../store/useUIStore';
-import DataGridSkeleton from '../../../components/DataGridSkeleton';
+import {DataGridSkeleton} from '../../../components';
 
 export default function ManageUsers() {
-  const { accessToken } = useAuth();
+  const { user } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL;
   const queryClient = useQueryClient();
+  const showSnackbar = useUIStore((state) => state.showSnackbar);
 
   // 🔹 State
   const [page, setPage] = useState(0);          
   const [pageSize, setPageSize] = useState(10); 
   const theme = useUIStore((state) => state.theme);
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-
-
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-  const handleCloseSnackbar = () => setSnackbarOpen(false);
-
   // 🔹 Fetch users
   const { data, isLoading, error } = useQuery({
     queryKey: ['users', page, pageSize],
     queryFn: async () => {
-      const res = await axiosInstance.get(`${API_BASE}/accounts/admin/users/`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const res = await api.get(`${API_BASE}/accounts/admin/users/`, {
         params: { page: page + 1, page_size: pageSize },
       });
       return res.data; // { results: [], count: 123 }
     },
-    enabled: !!accessToken, // only run if token exists
+    enabled: !!user?.id,
     keepPreviousData: true,
   });
 
@@ -51,10 +38,9 @@ export default function ManageUsers() {
   // 🔹 Mutation for role update
   const roleMutation = useMutation({
     mutationFn: async ({ id, newRole }) => {
-      return axiosInstance.patch(
+      return api.patch(
         `${API_BASE}/accounts/admin/users/${id}/`,
-        { role: newRole },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { role: newRole }
       );
     },
     onSuccess: (_, variables) => {
@@ -67,8 +53,7 @@ export default function ManageUsers() {
         return { ...oldData, results: updatedResults };
       });
       showSnackbar('Role updated successfully!', 'success');
-    },
-    onError: () => showSnackbar('Failed to update role', 'error'),
+    }
   });
 
   const handleRoleChange = (id, newRole) => {
@@ -140,6 +125,7 @@ export default function ManageUsers() {
          <DataGridSkeleton
           columns={columns}
           rowCount={pageSize}
+          theme={theme}
         />
       ) : (
         <DataGrid
@@ -164,12 +150,6 @@ export default function ManageUsers() {
           sx={sx}
         />
       )}
-
-      <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }

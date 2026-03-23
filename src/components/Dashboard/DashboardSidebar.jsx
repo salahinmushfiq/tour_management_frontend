@@ -21,9 +21,9 @@ const navConfig = {
   ],
   organizer: [
     { to: '/dashboard/organizer', label: 'Dashboard', icon: <Home size={20} /> },
-    { to: '/dashboard/organizer/tours', label: 'My Tours', icon: <ListCheck size={20} /> },
     { to: '/dashboard/organizer/tours/create', label: 'Create Tour', icon: <PlusSquare size={20} /> },
-    { to: '/dashboard/organizer/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> },
+    { to: '/dashboard/organizer/tours', label: 'My Tours', icon: <ListCheck size={20} /> },
+    { to: '/dashboard/organizer/bookings', label: 'Bookings', icon: <ChartBarStacked size={20} /> }
   ],
   guide: [
     { to: '/dashboard/guide', label: 'Dashboard', icon: <Home size={20} /> },

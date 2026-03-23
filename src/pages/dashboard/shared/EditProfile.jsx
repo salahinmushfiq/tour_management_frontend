@@ -120,7 +120,7 @@ import axiosInstance from "../../../api/axiosInstance";
 import { useAuth } from "../../../context/AuthContext";
 import { useUIStore } from "../../../store/useUIStore";
 import { Skeleton, Divider } from "@mui/material";
-import { FiCamera, FiMapPin, FiPhone, FiInfo, FiArrowLeft, FiSave } from "react-icons/fi";
+import { FiCamera, FiMapPin, FiPhone, FiInfo, FiArrowLeft, FiSave, FiUser} from "react-icons/fi";
 
 export default function EditProfile() {
   const { user, setUser } = useAuth();
@@ -203,11 +203,16 @@ export default function EditProfile() {
         <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700">
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative group">
-              <img
-                src={formData.profile_picture || "https://via.placeholder.com/150"}
-                alt="Preview"
-                className="w-24 h-24 rounded-2xl object-cover border-4 border-blue-50 dark:border-slate-700 shadow-md"
-              />
+               {
+                  formData.profile_picture ?
+                  (
+                    <img
+                      src={formData.profile_picture}
+                      alt="Preview"
+                      className="w-24 h-24 rounded-2xl object-cover border-4 border-blue-50 dark:border-slate-700 shadow-md"
+                    />
+                  ):(<FiUser className="bg-white dark:bg-slate-800 text-gray-300 dark:text-white-900 bg: text-3xl w-32 h-32 rounded-2xl border-4 border-white dark:border-slate-700 object-cover shadow-lg" />)
+                }
               <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <FiCamera className="text-white text-xl" />
               </div>
