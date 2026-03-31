@@ -107,7 +107,7 @@ const AiChatPopup = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white/40 backdrop-blur-md z-[9998] flex justify-end pt-24 pb-8 px-6 pointer-events-none"
+            className="fixed inset-0 bg-white/40 backdrop-blur-md z-[9998] flex justify-end pt-24 pb-2 px-6 pointer-events-none"
           >
             <motion.div
               ref={popupRef}
@@ -155,15 +155,6 @@ const AiChatPopup = () => {
                 </div>
               </div>
 
-              {/* Subtle Status Bar */}
-              <div className="z-10 bg-white/90 dark:bg-slate-900/50 backdrop-blur-sm px-6 py-2.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-tighter">Identity Verified: AI Discovery Core</span>
-                <div className="flex gap-1">
-                  <div className="w-1 h-1 rounded-full bg-blue-400" />
-                  <div className="w-1 h-1 rounded-full bg-indigo-400" />
-                  <div className="w-1 h-1 rounded-full bg-violet-400" />
-                </div>
-              </div>
 
               {/* Assistant Component Body */}
               <div className="flex-1 overflow-hidden bg-white/30 dark:bg-slate-950 z-10 backdrop-blur-3xl">
@@ -174,11 +165,7 @@ const AiChatPopup = () => {
                 />
               </div>
 
-              <div className="p-4 bg-white/80 dark:bg-slate-900 text-center border-t border-slate-50 dark:border-white/5 z-20">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">
-                  Start Discovery
-                </p>
-              </div>
+              <span className="p-0 bg-white/80 dark:bg-slate-900 text-center border-t border-slate-50 dark:border-white/5 z-20 h-0"/>
             </motion.div>
           </motion.div>
         )}

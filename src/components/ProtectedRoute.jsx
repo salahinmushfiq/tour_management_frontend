@@ -8,13 +8,12 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  const isAuthorized = user && allowedRoles.includes(user.role);
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!isAuthorized) {
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

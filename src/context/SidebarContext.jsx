@@ -1,4 +1,4 @@
-// context/SidebarContext.js (optional)
+// context/SidebarContext.js 
 import { createContext, useContext, useState } from 'react';
 
 const SidebarContext = createContext();

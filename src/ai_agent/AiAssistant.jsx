@@ -232,7 +232,7 @@ const AiAssistant = ({ messages, setMessages, onMessagesChange }) => {
                   key={i}
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }}
-                  className="w-1.5 h-1.5 bg-indigo-400 rounded-full"
+                  className="w-1.5 h-1.5 bg-blue-400 rounded-full"
                 />
               ))}
             </div>
@@ -243,7 +243,7 @@ const AiAssistant = ({ messages, setMessages, onMessagesChange }) => {
 
       {/* Input Area */}
       <div className="p-4 bg-slate-900/80 border-t border-white/5 backdrop-blur-xl">
-        <div className="relative flex items-end gap-2 bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2 focus-within:border-indigo-500/50 transition-colors">
+        <div className="relative flex items-end gap-2 bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2 focus-within:border-blue-500/50 transition-colors">
           <textarea
             ref={textareaRef}
             rows={1}
@@ -256,7 +256,7 @@ const AiAssistant = ({ messages, setMessages, onMessagesChange }) => {
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="p-2 rounded-lg bg-indigo-600 text-white disabled:opacity-30 disabled:grayscale transition-all hover:bg-indigo-500 active:scale-90"
+            className="p-2 rounded-lg bg-blue-500 text-white disabled:opacity-30 disabled:grayscale transition-all hover:bg-blue-600 active:scale-90"
           >
             <Send size={16} />
           </button>

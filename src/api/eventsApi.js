@@ -1,3 +1,4 @@
+// api/eventsApi.js
 import axios from "axios";
 
 export const fetchEvents = async ({ pageParam = 1, queryKey }) => {
