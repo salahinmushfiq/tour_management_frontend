@@ -143,7 +143,7 @@ const AiAssistant = ({ messages, setMessages, onMessagesChange }) => {
     }
     const loadPreviousSession = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8001/chat/history/${sessionId}`);
+        const res = await fetch(`${import.meta.env.VITE_FASTAPI_URL}/chat/history/${sessionId}`);
         const data = await res.json();
         if (Array.isArray(data.history)) setMessages(data.history);
       } catch (err) {}
@@ -163,7 +163,7 @@ const AiAssistant = ({ messages, setMessages, onMessagesChange }) => {
     pushMessage({ role: "user", content: questionText, timestamp: Date.now() });
 
     try {
-      const res = await fetch("http://127.0.0.1:8001/chat/", {
+      const res = await fetch(`${import.meta.env.VITE_FASTAPI_URL}/chat/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: questionText, session_id: sessionId, top_k: 3 }),
