@@ -1,89 +1,53 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import AiAssistant from "../ai_agent/AiAssistant";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaRegWindowMinimize } from "react-icons/fa";
-import { CgClose } from "react-icons/cg";
-import { Bot, Zap, Compass, Sparkles } from "lucide-react"; 
-
-const STORAGE_KEYS = {
-  OPEN: "trekbot_chat_open",
-  MINIMIZED: "trekbot_chat_minimized",
-  UNREAD: "trekbot_has_new_message",
-};
+import { Bot, X, Minus, Globe, Shield, RefreshCcw } from "lucide-react";
+import AiAssistant from "../ai_agent/AiAssistant";
 
 const AiChatPopup = () => {
-  const [open, setOpen] = useState(() => localStorage.getItem(STORAGE_KEYS.OPEN) === "true");
-  const [minimized, setMinimized] = useState(
-    () => localStorage.getItem(STORAGE_KEYS.MINIMIZED) === "true"
-  );
-  const [hasNewMessage, setHasNewMessage] = useState(
-    () => localStorage.getItem(STORAGE_KEYS.UNREAD) === "true"
-  );
-  const [messages, setMessages] = useState([]);
+  // Load initial states from localStorage
+  const [isOpen, setIsOpen] = useState(() => localStorage.getItem("trek_chat_open") === "true");
+  const [isMinimized, setIsMinimized] = useState(() => localStorage.getItem("trek_chat_minimized") === "true");
+  
+  // Load messages from localStorage to prevent wipe on reload
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem("trek_chat_history");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  const popupRef = useRef(null);
-  const lastMessageCountRef = useRef(0);
-
+  // Sync state changes to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.OPEN, open);
-    localStorage.setItem(STORAGE_KEYS.MINIMIZED, minimized);
-  }, [open, minimized]);
+    localStorage.setItem("trek_chat_open", isOpen);
+    localStorage.setItem("trek_chat_minimized", isMinimized);
+    localStorage.setItem("trek_chat_history", JSON.stringify(messages));
+  }, [isOpen, isMinimized, messages]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.UNREAD, hasNewMessage);
-  }, [hasNewMessage]);
-
-  useEffect(() => {
-    if (open && !minimized) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+  const clearSession = () => {
+    if(window.confirm("Terminate current session and wipe local history?")) {
+      setMessages([]);
+      localStorage.removeItem("trek_session_id");
+      localStorage.removeItem("trek_chat_history");
     }
-    return () => (document.body.style.overflow = "");
-  }, [open, minimized]);
-
-  useEffect(() => {
-    const handleEsc = (e) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, []);
-
-  const getDragConstraints = useCallback(() => {
-    if (!popupRef.current) return {};
-    const rect = popupRef.current.getBoundingClientRect();
-    return {
-      top: 90, // Strict clearance for your Navbar
-      left: 20,
-      right: window.innerWidth - rect.width - 24,
-      bottom: window.innerHeight - rect.height - 24,
-    };
-  }, []);
-
-  const handleMessagesChange = useCallback(
-    (updatedMessages) => {
-      if (minimized && updatedMessages.length > lastMessageCountRef.current) {
-        const lastMsg = updatedMessages[updatedMessages.length - 1];
-        if (lastMsg?.role === "assistant") {
-          setHasNewMessage(true);
-        }
-      }
-      lastMessageCountRef.current = updatedMessages.length;
-    },
-    [minimized]
-  );
-
-  const handleOpen = () => {
-    setOpen(true);
-    setMinimized(false);
-    setHasNewMessage(false);
   };
 
   return (
     <>
-      {/* Trigger Button */}
-      {!open || minimized ? (
+      {/* Floating Toggle Trigger */}
+      {/* {(!isOpen || isMinimized) && (
         <motion.button
-          onClick={handleOpen}
+          layoutId="chat-box"
+          onClick={() => { setIsOpen(true); setIsMinimized(false); }}
+          className="fixed bottom-8 right-8 z-[9999] w-16 h-16 bg-blue-600 text-white rounded-full shadow-[0_8px_30px_rgb(79,70,229,0.4)] flex items-center justify-center border border-white/20 hover:scale-110 transition-transform"
+        >
+          <Bot size={32} />
+          {messages.length > 0 && (
+            <span className="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-900" />
+          )}
+        </motion.button>
+      )} */}
+      
+        {(!isOpen || isMinimized) && (
+        <motion.button
+          onClick={() => { setIsOpen(true); setIsMinimized(false); }}
           initial={{ scale: 0, rotate: -45 }}
           animate={{ scale: 1, rotate: 0 }}
           whileHover={{ scale: 1.1 }}
@@ -92,94 +56,79 @@ const AiChatPopup = () => {
         >
           <span className="absolute inset-0 rounded-2xl bg-blue-400 animate-pulse opacity-20 blur-xl group-hover:opacity-40 transition-opacity" />
           <Bot size={30} className="relative z-10 text-blue-100" />
-          {hasNewMessage && (
+          {messages.length > 0 && (
             <span className="absolute top-2 right-2 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-900 animate-bounce" />
           )}
           <span className="absolute right-20 px-3 py-1.5 rounded-lg bg-slate-900 text-[10px] font-black uppercase tracking-widest text-blue-400 opacity-0 group-hover:opacity-100 transition-all border border-blue-500/30 whitespace-nowrap pointer-events-none">
             Ask TrekBot
           </span>
         </motion.button>
-      ) : null}
+      )
+      }
 
       <AnimatePresence>
-        {open && !minimized && (
+        {isOpen && !isMinimized && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white/40 backdrop-blur-md z-[9998] flex justify-end pt-24 pb-2 px-6 pointer-events-none"
+            layoutId="chat-box"
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="fixed bottom-8 right-8 z-[9999] w-[420px] h-[650px] max-h-[85vh] flex flex-col bg-white dark:bg-[#0B0F1A] rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-white/10 overflow-hidden"
           >
-            <motion.div
-              ref={popupRef}
-              drag
-              dragConstraints={getDragConstraints()}
-              dragElastic={0.05}
-              initial={{ y: 50, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 50, opacity: 0, scale: 0.95 }}
-              /* THE MESH LOOK: High-energy Discovery Gradient */
-              className="pointer-events-auto w-full sm:w-[450px] h-fit max-h-[85vh] bg-white dark:bg-slate-900 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] rounded-[3rem] border-[8px] border-white dark:border-slate-800 overflow-hidden flex flex-col ring-1 ring-slate-200 dark:ring-black relative"
-            >
-              {/* Decorative Mesh Background Blobs (Light Mode Only) */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 dark:hidden">
-                <div className="absolute -top-[10%] -left-[10%] w-64 h-64 bg-blue-200 rounded-full blur-[80px]" />
-                <div className="absolute top-[20%] -right-[10%] w-64 h-64 bg-indigo-200 rounded-full blur-[80px]" />
-                <div className="absolute bottom-[10%] left-[20%] w-64 h-64 bg-violet-100 rounded-full blur-[80px]" />
-              </div>
-
-              {/* Header: Solid & Sharp */}
-              <div className="p-6 bg-slate-950 dark:bg-black flex justify-between items-center relative z-20">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-blue-500 blur-lg opacity-50 animate-pulse" />
-                    <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl relative shadow-lg">
-                      <Compass size={22} className="text-white animate-spin-slow" />
-                    </div>
-                  </div>
-                  <div>
-                    <h2 className="text-[13px] font-black tracking-[0.2em] text-white uppercase">TrekBot Guide</h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Sparkles size={10} className="text-yellow-400" />
-                      <span className="text-[9px] text-blue-300 font-bold uppercase tracking-widest">Live Exploration Mode</span>
-                    </div>
+            {/* Header */}
+            <div className="p-5 flex items-center justify-between bg-white dark:bg-transparent border-b border-slate-100 dark:border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/30">
+                  <Globe size={20} className="animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.15em] dark:text-white">Discovery Agent</h3>
+                  <div className="flex items-center gap-1.5">
+                    <Shield size={10} className="text-emerald-500" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Secured Node</span>
                   </div>
                 </div>
-
-                <div className="flex gap-2">
-                  <button onClick={() => setMinimized(true)} className="p-2 text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <FaRegWindowMinimize size={14} />
-                  </button>
-                  <button onClick={() => setOpen(false)} className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
-                    <CgClose size={22} />
-                  </button>
-                </div>
               </div>
 
-
-              {/* Assistant Component Body */}
-              <div className="flex-1 overflow-hidden bg-white/30 dark:bg-slate-950 z-10 backdrop-blur-3xl">
-                <AiAssistant
-                  messages={messages}
-                  setMessages={setMessages}
-                  onMessagesChange={handleMessagesChange}
-                />
+              <div className="flex items-center gap-1">
+                <button 
+                  title="Clear History"
+                  onClick={clearSession}
+                  className="p-2 text-slate-300 hover:text-blue-500 transition-colors"
+                >
+                  <RefreshCcw size={14} />
+                </button>
+                <button 
+                  onClick={() => setIsMinimized(true)}
+                  className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+                >
+                  <Minus size={20} />
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                >
+                  <X size={22} />
+                </button>
               </div>
+            </div>
 
-              <span className="p-0 bg-white/80 dark:bg-slate-900 text-center border-t border-slate-50 dark:border-white/5 z-20 h-0"/>
-            </motion.div>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden">
+              <AiAssistant messages={messages} setMessages={setMessages} />
+            </div>
+
+            {/* Subtle Footer */}
+            <div className="px-6 py-3 bg-slate-50 dark:bg-black/40 flex justify-between items-center border-t border-slate-100 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[8px] font-mono text-slate-400 uppercase tracking-widest">Database_Sync_Ok</span>
+              </div>
+              <span className="text-[8px] font-mono text-slate-400 opacity-50 uppercase">v3.0.4-Discovery</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <style jsx>{`
-        .animate-spin-slow {
-          animation: spin 12s linear infinite;
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </>
   );
 };
