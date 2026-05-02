@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { Bot, X, Minus, Globe, Shield, RefreshCcw, GripHorizontal } from "lucide-react";
 import AiAssistant from "../ai_agent/AiAssistant";
+import clsx from "clsx";
+
 
 const AiChatPopup = () => {
   const constraintsRef = useRef(null);
